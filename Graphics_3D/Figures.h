@@ -74,11 +74,9 @@ namespace Figures3D {
 		void TakeProjection(Bitmap^ bm, const std::vector<Point3D>& coords) const {
 			std::vector<Models3D::CanvasPolygon> canvas_polygons;
 			for (const Models3D::Polygon3D& polygon : polygons_) {
-				/*
 				if (!IsPolygonVisible(polygon)) {
 					continue;
 				}
-				*/
 				std::vector<CanvasCoordinate> current_polygon_coords;
 				for (const Point3D* point : polygon.GetCoords(coords)) {
 					Point3D transformed_point = Operations3D::Apply(*point, Operations3D::OrthogonalZProjection());
@@ -101,33 +99,18 @@ namespace Figures3D {
 				(int) (point.y * canvas_scale_ + y_canvas_shift_)
 			};
 		}
-		/*
+
 		bool IsPolygonVisible(const Models3D::Polygon3D& polygon) const {
-			Models3D::PlaneEquation plane = polygon.GetPlaneEquation();
-			if (use_perspective) {
-				std::vector<Point3D> transormed_points;
-				for (const Point3D* point : polygon.GetCoords()) {
-					transormed_points.push_back(Operations3D::Apply(*point,
-						Operations3D::PerspectiveZProjection(focus_distance_)));
-				}
-				std::vector<const Point3D*> transormed_points_pointers;
-				for (const Point3D& point : transormed_points) {
-					transormed_points_pointers.push_back(&point);
-				}
-				Models3D::Polygon3D transformed_polygon(transormed_points_pointers);
-				plane = transformed_polygon.GetPlaneEquation();
-			}
-			//Models3D::PlaneEquation plane = transformed_polygon.GetPlaneEquation();
+			Models3D::PlaneEquation plane = polygon.GetPlaneEquation(coords_);
 			Point3D centroid = Get—entroid();
 
-			double m = -std::signbit(plane.a * centroid.x + plane.b * centroid.y + plane.c * centroid.z + plane.d);
+			double m = -Utils::Sign(plane.a * centroid.x + plane.b * centroid.y + plane.c * centroid.z + plane.d);
 			plane.a *= m; plane.b *= m; plane.c *= m; plane.d *= m;
 			Point3D view_point = GetViewPoint();
 
 			return (plane.a * view_point.x + plane.b * view_point.y + plane.c * view_point.z + plane.d) > 0;
-			
 		}
-		*/
+		
 		Point3D Get—entroid() const {
 			Point3D centroid;
 
@@ -144,7 +127,7 @@ namespace Figures3D {
 		}
 
 		Point3D GetViewPoint() const {
-			return { 0, 0, 500 };
+			return { 0, 0, focus_distance_ };
 		}
 		
 	protected:
