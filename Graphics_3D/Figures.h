@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <memory>
-#include <optional>
 
 #include "Models.h"
 #include "Operations.h"

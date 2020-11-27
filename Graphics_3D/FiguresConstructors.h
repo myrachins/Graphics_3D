@@ -185,7 +185,6 @@ namespace FiguresConstructors {
 					radius_ * std::sin(PI) * std::sin(nu),
 					radius_ * std::cos(PI) });
 			}
-
 			return coords;
 		}
 
@@ -199,14 +198,18 @@ namespace FiguresConstructors {
 				for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
 					size_t i = local_i + current_shift;
 					polygons.push_back(Models3D::Polygon3D({ i, i + 1, i + vert_shift }));
-					polygons.push_back(Models3D::Polygon3D({ i + 1, i + vert_shift, i + 1 + vert_shift }));
+					if (local_i + 2 != vert_shift) {
+						polygons.push_back(Models3D::Polygon3D({ i + 1, i + vert_shift, i + 1 + vert_shift }));
+					}
 				}
 			}
 			size_t current_shift = (number_of_shifts - 1) * vert_shift;
 			for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
 				size_t i = local_i + current_shift;
 				polygons.push_back(Models3D::Polygon3D({ i, i + 1, local_i }));
-				polygons.push_back(Models3D::Polygon3D({ i + 1, local_i, local_i + 1 }));
+				if (local_i + 2 != vert_shift) {
+					polygons.push_back(Models3D::Polygon3D({ i + 1, local_i, local_i + 1 }));
+				}
 			}
 			return polygons;
 		}
@@ -222,7 +225,7 @@ namespace FiguresConstructors {
 
 	protected:
 		double radius_;
-		const double STEP = 0.2;
+		const double STEP = 0.15;
 		const double PI = std::acos(-1);
 	};
 
