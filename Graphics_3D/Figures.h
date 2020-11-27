@@ -38,10 +38,11 @@ namespace Figures3D {
 		}
 
 		void TakeOrthogonalProjection(Bitmap^ bm) const {
-			TakeProjection(bm, false);
+			TakeProjection(bm, coords_);
 		}
 		void TakePerspectiveProjection(Bitmap^ bm) const {
-			TakeProjection(bm, true);
+			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
+			TakeProjection(bm, transformed_coords);
 		}
 
 		void Shift(double dx, double dy, double dz) {
@@ -70,22 +71,17 @@ namespace Figures3D {
 			}
 		}
 
-		void TakeProjection(Bitmap^ bm, bool use_perspective) const {
+		void TakeProjection(Bitmap^ bm, const std::vector<Point3D>& coords) const {
 			std::vector<Models3D::CanvasPolygon> canvas_polygons;
 			for (const Models3D::Polygon3D& polygon : polygons_) {
 				/*
-				if (!IsPolygonVisible(polygon, use_perspective)) {
+				if (!IsPolygonVisible(polygon)) {
 					continue;
 				}
 				*/
 				std::vector<CanvasCoordinate> current_polygon_coords;
-				for (const Point3D* point : polygon.GetCoords()) {
-					Point3D transformed_point = *point;
-					if (use_perspective) {
-						transformed_point = Operations3D::Apply(transformed_point,
-							Operations3D::PerspectiveZProjection(focus_distance_));
-					}
-					transformed_point = Operations3D::Apply(transformed_point, Operations3D::OrthogonalZProjection());
+				for (const Point3D* point : polygon.GetCoords(coords)) {
+					Point3D transformed_point = Operations3D::Apply(*point, Operations3D::OrthogonalZProjection());
 					current_polygon_coords.push_back(GetCanvasCoordinate(transformed_point));
 				}
 				canvas_polygons.push_back(Models3D::CanvasPolygon(std::move(current_polygon_coords)));
@@ -105,8 +101,8 @@ namespace Figures3D {
 				(int) (point.y * canvas_scale_ + y_canvas_shift_)
 			};
 		}
-
-		bool IsPolygonVisible(const Models3D::Polygon3D& polygon, bool use_perspective) const {
+		/*
+		bool IsPolygonVisible(const Models3D::Polygon3D& polygon) const {
 			Models3D::PlaneEquation plane = polygon.GetPlaneEquation();
 			if (use_perspective) {
 				std::vector<Point3D> transormed_points;
@@ -129,8 +125,9 @@ namespace Figures3D {
 			Point3D view_point = GetViewPoint();
 
 			return (plane.a * view_point.x + plane.b * view_point.y + plane.c * view_point.z + plane.d) > 0;
+			
 		}
-
+		*/
 		Point3D Get—entroid() const {
 			Point3D centroid;
 

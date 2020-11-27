@@ -40,14 +40,14 @@ namespace FiguresConstructors {
 		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[1], &coordinates[2], &coordinates[3] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4], &coordinates[5], &coordinates[6], &coordinates[7] }));
+			polygons.push_back(Models3D::Polygon3D({ 0, 1, 2, 3 }));
+			polygons.push_back(Models3D::Polygon3D({ 4, 5, 6, 7 }));
 
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[1], &coordinates[5], &coordinates[6], &coordinates[2] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[4], &coordinates[7], &coordinates[3] }));
+			polygons.push_back(Models3D::Polygon3D({ 1, 5, 6, 2 }));
+			polygons.push_back(Models3D::Polygon3D({ 0, 4, 7, 3 }));
 
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[1], &coordinates[5], &coordinates[4] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[3], &coordinates[2], &coordinates[6], &coordinates[7] }));
+			polygons.push_back(Models3D::Polygon3D({ 0, 1, 5, 4 }));
+			polygons.push_back(Models3D::Polygon3D({ 3, 2, 6, 7 }));
 
 			return polygons;
 		}
@@ -69,10 +69,10 @@ namespace FiguresConstructors {
 		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[1], &coordinates[3] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[1], &coordinates[2], &coordinates[3] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[2], &coordinates[3] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[1], &coordinates[2] }));
+			polygons.push_back(Models3D::Polygon3D({ 0, 1, 3 }));
+			polygons.push_back(Models3D::Polygon3D({ 1, 2, 3 }));
+			polygons.push_back(Models3D::Polygon3D({ 0, 2, 3 }));
+			polygons.push_back(Models3D::Polygon3D({ 0, 1, 2 }));
 
 			return polygons;
 		}
@@ -97,11 +97,11 @@ namespace FiguresConstructors {
 		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
-			for (int i = 4; i <= 5; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[0], &coordinates[1], &coordinates[i] }));
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[1], &coordinates[2], &coordinates[i] }));
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[2], &coordinates[3], &coordinates[i] }));
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[3], &coordinates[0], &coordinates[i] }));
+			for (size_t i = 4; i <= 5; ++i) {
+				polygons.push_back(Models3D::Polygon3D({ 0, 1, i }));
+				polygons.push_back(Models3D::Polygon3D({ 1, 2, i }));
+				polygons.push_back(Models3D::Polygon3D({ 2, 3, i }));
+				polygons.push_back(Models3D::Polygon3D({ 3, 0, i }));
 			}
 			return polygons;
 		}
@@ -139,24 +139,24 @@ namespace FiguresConstructors {
 			std::vector<Models3D::Polygon3D> polygons;
 			
 			for (size_t i = 0; i + 1 < 5; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i], &coordinates[i + 5], &coordinates[i + 1] }));
+				polygons.push_back(Models3D::Polygon3D({ i, i + 5, i + 1 }));
 			}
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4], &coordinates[4 + 5], &coordinates[0] }));
+			polygons.push_back(Models3D::Polygon3D({ 4, 4 + 5, 0 }));
 			
 			for (size_t i = 0; i + 1 < 5; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i + 5], &coordinates[i + 1], &coordinates[i + 5 + 1] }));
+				polygons.push_back(Models3D::Polygon3D({ i + 5, i + 1, i + 5 + 1 }));
 			}
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4 + 5], &coordinates[0], &coordinates[5] }));
+			polygons.push_back(Models3D::Polygon3D({ 4 + 5, 0, 5 }));
 			
 			for (size_t i = 0; i + 1 < 5; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i], &coordinates[i + 1], &coordinates[10] }));
+				polygons.push_back(Models3D::Polygon3D({ i, i + 1, 10 }));
 			}
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4], &coordinates[0], &coordinates[10] }));
+			polygons.push_back(Models3D::Polygon3D({ 4, 0, 10 }));
 			
 			for (size_t i = 5; i + 1 < 10; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i], &coordinates[i + 1], &coordinates[11] }));
+				polygons.push_back(Models3D::Polygon3D({ i, i + 1, 11 }));
 			}
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4 + 5], &coordinates[0 + 5], &coordinates[11] }));
+			polygons.push_back(Models3D::Polygon3D({ 4 + 5, 0 + 5, 11 }));
 			
 			return polygons;
 		}
@@ -198,15 +198,15 @@ namespace FiguresConstructors {
 				size_t current_shift = shift_num * vert_shift;
 				for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
 					size_t i = local_i + current_shift;
-					polygons.push_back(Models3D::Polygon3D({ &coordinates[i], &coordinates[i + 1], &coordinates[i + vert_shift] }));
-					polygons.push_back(Models3D::Polygon3D({ &coordinates[i + 1], &coordinates[i + vert_shift], &coordinates[i + 1 + vert_shift] }));
+					polygons.push_back(Models3D::Polygon3D({ i, i + 1, i + vert_shift }));
+					polygons.push_back(Models3D::Polygon3D({ i + 1, i + vert_shift, i + 1 + vert_shift }));
 				}
 			}
 			size_t current_shift = (number_of_shifts - 1) * vert_shift;
 			for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
 				size_t i = local_i + current_shift;
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i], &coordinates[i + 1], &coordinates[local_i] }));
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i + 1], &coordinates[local_i], &coordinates[local_i + 1] }));
+				polygons.push_back(Models3D::Polygon3D({ i, i + 1, local_i }));
+				polygons.push_back(Models3D::Polygon3D({ i + 1, local_i, local_i + 1 }));
 			}
 			return polygons;
 		}
@@ -240,12 +240,12 @@ namespace FiguresConstructors {
 			std::vector<Models3D::Point3D> coords;
 			for (const Models3D::Polygon3D& polygon : icosahedron_polygons) {
 				Models3D::Point3D average_point;
-				for (const Models3D::Point3D* point : polygon.GetCoords()) {
+				for (const Models3D::Point3D* point : polygon.GetCoords(icosahedron_coords)) {
 					average_point.x += point->x;
 					average_point.y += point->y;
 					average_point.z += point->z;
 				}
-				size_t coords_num = polygon.GetCoords().size();
+				size_t coords_num = polygon.GetCoords(icosahedron_coords).size();
 				average_point.x /= coords_num;
 				average_point.y /= coords_num;
 				average_point.z /= coords_num;
@@ -259,18 +259,18 @@ namespace FiguresConstructors {
 		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[10], &coordinates[11], &coordinates[12], &coordinates[13],  &coordinates[14] }));
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[15], &coordinates[16], &coordinates[17], &coordinates[18],  &coordinates[19] }));
+			polygons.push_back(Models3D::Polygon3D({ 10, 11, 12, 13, 14 }));
+			polygons.push_back(Models3D::Polygon3D({ 15, 16, 17, 18, 19 }));
 			
 			for (size_t i = 0; i + 1 < 5; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i], &coordinates[i + 5],  &coordinates[i + 1], &coordinates[i + 11],  &coordinates[i + 10] }));
+				polygons.push_back(Models3D::Polygon3D({ i, i + 5, i + 1, i + 11, i + 10 }));
 			}
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4], &coordinates[4 + 5],  &coordinates[0], &coordinates[10],  &coordinates[4 + 10] }));
+			polygons.push_back(Models3D::Polygon3D({ 4, 4 + 5, 0, 10,  4 + 10 }));
 			
 			for (size_t i = 0; i + 1 < 5; ++i) {
-				polygons.push_back(Models3D::Polygon3D({ &coordinates[i + 5], &coordinates[i + 1],  &coordinates[i + 5 + 1], &coordinates[i + 16],  &coordinates[i + 15] }));
+				polygons.push_back(Models3D::Polygon3D({ i + 5, i + 1, i + 5 + 1, i + 16, i + 15 }));
 			}
-			polygons.push_back(Models3D::Polygon3D({ &coordinates[4 + 5], &coordinates[0],  &coordinates[5], &coordinates[15],  &coordinates[4 + 15] }));
+			polygons.push_back(Models3D::Polygon3D({ 4 + 5, 0, 5, 15, 4 + 15 }));
 
 			return polygons;
 		}

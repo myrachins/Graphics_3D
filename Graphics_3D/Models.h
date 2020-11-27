@@ -29,18 +29,23 @@ namespace Models3D {
 
 	class Polygon3D {
 	public:
-		Polygon3D(std::vector<const Point3D*> coords)
-			: coords_(std::move(coords)) {
-			if (coords_.size() < 3) {
+		Polygon3D(std::vector<size_t> coords_inds)
+			: coords_inds_(std::move(coords_inds)) {
+			if (coords_inds_.size() < 3) {
 				throw std::runtime_error("");
 			}
 		}
-		const std::vector<const Point3D*>& GetCoords() const {
-			return coords_;
+		std::vector<const Point3D*> GetCoords(const std::vector<Point3D>& points) const {
+			std::vector<const Point3D*> coords;
+			for (size_t ind : coords_inds_) {
+				coords.push_back(&points[ind]);
+			}
+			return coords;
 		}
-		PlaneEquation GetPlaneEquation() const {
-			Point3D vector1(coords_[0]->x - coords_[1]->x, coords_[0]->y - coords_[1]->y, coords_[0]->z - coords_[1]->z);
-			Point3D vector2(coords_[0]->x - coords_[2]->x, coords_[0]->y - coords_[2]->y, coords_[0]->z - coords_[2]->z);
+		PlaneEquation GetPlaneEquation(const std::vector<Point3D>& points) const {
+			std::vector<const Point3D*> coords = GetCoords(points);
+			Point3D vector1(coords[0]->x - coords[1]->x, coords[0]->y - coords[1]->y, coords[0]->z - coords[1]->z);
+			Point3D vector2(coords[0]->x - coords[2]->x, coords[0]->y - coords[2]->y, coords[0]->z - coords[2]->z);
 
 			PlaneEquation plane;
 			plane.a = vector1.y * vector2.z - vector2.y * vector1.z;
@@ -52,7 +57,7 @@ namespace Models3D {
 		}
 
 	protected:
-		std::vector<const Point3D*> coords_;
+		std::vector<size_t> coords_inds_;
 	};
 
 	class CanvasPolygon {

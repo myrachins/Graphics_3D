@@ -47,6 +47,14 @@ namespace Operations3D {
 		return GetPointFromMatrix(result_matrix);
 	}
 
+	std::vector<Models3D::Point3D> ApplyForAll(const std::vector<Models3D::Point3D>& coords, const BaseOperation& operation) {
+		std::vector<Models3D::Point3D> transformed_coords;
+		for (const Models3D::Point3D& coord : coords) {
+			transformed_coords.push_back(Apply(coord, operation));
+		}
+		return transformed_coords;
+	}
+
 	class Rotate : public BaseOperation {
 	public:
 		Rotate(double angle_phi) 
