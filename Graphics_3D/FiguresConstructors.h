@@ -9,7 +9,7 @@ namespace FiguresConstructors {
 	class FigureConstructor {
 	public:
 		virtual std::vector<Models3D::Point3D> ConstructCoords() const = 0;
-		virtual std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const = 0;
+		virtual std::vector<Models3D::Polygon3D> ConstructPolygons() const = 0;
 	};
 
 	namespace {
@@ -37,7 +37,7 @@ namespace FiguresConstructors {
 			return GetHexahedronCoords(edge_len_);
 		}
 
-		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
 			polygons.push_back(Models3D::Polygon3D({ 0, 1, 2, 3 }));
@@ -66,7 +66,7 @@ namespace FiguresConstructors {
 			return tet_coords;
 		}
 
-		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
 			polygons.push_back(Models3D::Polygon3D({ 0, 1, 3 }));
@@ -94,7 +94,7 @@ namespace FiguresConstructors {
 			return oct_coords;
 		}
 
-		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
 			for (size_t i = 4; i <= 5; ++i) {
@@ -135,7 +135,7 @@ namespace FiguresConstructors {
 			return coords;
 		}
 
-		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
 			std::vector<Models3D::Polygon3D> polygons;
 			
 			for (size_t i = 0; i + 1 < 5; ++i) {
@@ -188,10 +188,10 @@ namespace FiguresConstructors {
 			return coords;
 		}
 
-		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
 			std::vector<Models3D::Polygon3D> polygons;
 			const size_t vert_shift = GetStepsNumberInVertical();
-			const size_t number_of_shifts = coordinates.size() / vert_shift;
+			const size_t number_of_shifts = ConstructCoords().size() / vert_shift;
 
 			for (size_t shift_num = 0; shift_num + 1 < number_of_shifts; ++shift_num) {
 				size_t current_shift = shift_num * vert_shift;
@@ -235,10 +235,9 @@ namespace FiguresConstructors {
 			: edge_len_(edge_len) { }
 
 		std::vector<Models3D::Point3D> ConstructCoords() const override {
-			// edge_len_ * 3. * std::sqrt(2.) / (2. * std::sqrt(1 + std::cos(3. * PI / 5))
-			IcosahedronConstructor icosahedron_constructor(2); // TODO
+			IcosahedronConstructor icosahedron_constructor(edge_len_ * 3. / (std::sqrt(2.) * std::sqrt(1 - std::cos(3. * PI / 5.))));
 			std::vector<Models3D::Point3D> icosahedron_coords = icosahedron_constructor.ConstructCoords();
-			std::vector<Models3D::Polygon3D> icosahedron_polygons = icosahedron_constructor.ConstructPolygons(icosahedron_coords);
+			std::vector<Models3D::Polygon3D> icosahedron_polygons = icosahedron_constructor.ConstructPolygons();
 
 			std::vector<Models3D::Point3D> coords;
 			for (const Models3D::Polygon3D& polygon : icosahedron_polygons) {
@@ -259,7 +258,7 @@ namespace FiguresConstructors {
 			return coords;
 		}
 
-		std::vector<Models3D::Polygon3D> ConstructPolygons(const std::vector<Models3D::Point3D>& coordinates) const override {
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
 			std::vector<Models3D::Polygon3D> polygons;
 
 			polygons.push_back(Models3D::Polygon3D({ 10, 11, 12, 13, 14 }));

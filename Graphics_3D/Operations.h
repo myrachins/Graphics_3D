@@ -176,7 +176,7 @@ namespace Operations3D {
 			Models3D::Matrix projection_matrix = {
 			{ 1, 0, 0, 0 },
 			{ 0, 1, 0, 0 },
-			{ 0, 0, 0, -1 / focus_distance },
+			{ 0, 0, 1, -1 / focus_distance },
 			{ 0, 0, 0, 1 } };
 
 			return Utils::Multiply(left, projection_matrix);

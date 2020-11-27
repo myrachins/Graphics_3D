@@ -51,7 +51,7 @@ namespace Models3D {
 			plane.a = vector1.y * vector2.z - vector2.y * vector1.z;
 			plane.b = vector1.z * vector2.x - vector2.z * vector1.x;
 			plane.c = vector1.x * vector2.y - vector2.x * vector1.y;
-			plane.d = -(plane.a * coords[0]->x + plane.b *coords[0]->y + plane.c * coords[0]->z);
+			plane.d = -(plane.a * coords[0]->x + plane.b * coords[0]->y + plane.c * coords[0]->z);
 
 			return plane;
 		}

@@ -18,11 +18,12 @@ namespace Figures3D {
 	class Figure {
 	public:
 		Figure(const FiguresConstructors::FigureConstructor& constructor,
-			double canvas_scale = 1, double x_canvas_shift = 0, double y_canvas_shift = 0, double focus_distance = 1)
+			double canvas_scale, double x_canvas_shift, double y_canvas_shift,
+			double focus_distance, double camera_distance)
 			: x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
-			, canvas_scale_(canvas_scale), focus_distance_(focus_distance) {
+			, canvas_scale_(canvas_scale), focus_distance_(focus_distance), camera_distance_(camera_distance) {
 			coords_ = constructor.ConstructCoords();
-			polygons_ = constructor.ConstructPolygons(coords_);
+			polygons_ = constructor.ConstructPolygons();
 		}
 
 		Figure(const Figure&) = delete;
@@ -42,7 +43,7 @@ namespace Figures3D {
 			TakeProjection(bm, coords_, polygons_);
 		}
 		void TakeOnlyVisibleOrthogonalProjection(Bitmap^ bm) const {
-			TakeProjection(bm, coords_, GetOnlyVisiblePlygons());
+			TakeProjection(bm, coords_, GetOnlyVisiblePlygons(coords_));
 		}
 		void TakePerspectiveProjection(Bitmap^ bm) const {
 			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
@@ -50,7 +51,7 @@ namespace Figures3D {
 		}
 		void TakeOnlyVisiblePerspectiveProjection(Bitmap^ bm) const {
 			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
-			TakeProjection(bm, transformed_coords, GetOnlyVisiblePlygons());
+			TakeProjection(bm, transformed_coords, GetOnlyVisiblePlygons(transformed_coords));
 		}
 
 		void Shift(double dx, double dy, double dz) {
@@ -105,8 +106,8 @@ namespace Figures3D {
 			};
 		}
 
-		bool IsPolygonVisible(const Polygon3D& polygon) const {
-			Models3D::PlaneEquation plane = polygon.GetPlaneEquation(coords_);
+		bool IsPolygonVisible(const Polygon3D& polygon, const std::vector<Point3D>& coords) const {
+			Models3D::PlaneEquation plane = polygon.GetPlaneEquation(coords);
 			Point3D centroid = GetÑentroid();
 
 			double m = -Utils::Sign(plane.a * centroid.x + plane.b * centroid.y + plane.c * centroid.z + plane.d);
@@ -116,11 +117,11 @@ namespace Figures3D {
 			return (plane.a * view_point.x + plane.b * view_point.y + plane.c * view_point.z + plane.d) > 0;
 		}
 
-		std::vector<Polygon3D> GetOnlyVisiblePlygons() const {
+		std::vector<Polygon3D> GetOnlyVisiblePlygons(const std::vector<Point3D>& coords) const {
 			std::vector<Polygon3D> only_visible;
 			std::copy_if(polygons_.begin(), polygons_.end(), std::back_inserter(only_visible),
 				[&](const Polygon3D& polygon) {
-				return IsPolygonVisible(polygon);
+				return IsPolygonVisible(polygon, coords);
 			});
 			return only_visible;
 		}
@@ -141,21 +142,21 @@ namespace Figures3D {
 		}
 
 		Point3D GetViewPoint() const {
-			return { 0, 0, focus_distance_ };
+			return { 0, 0, camera_distance_ };
 		}
 		
 	protected:
 		std::vector<Point3D> coords_;
 		std::vector<Polygon3D> polygons_;
 		double x_canvas_shift_, y_canvas_shift_, canvas_scale_;
-		double focus_distance_;
+		double focus_distance_, camera_distance_;
 	};
 
 	class FuguresFabric {
 	public:
-		FuguresFabric(double canvas_scale = 1, double x_canvas_shift = 0, double y_canvas_shift = 0, double focus_distance = 1)
+		FuguresFabric(double canvas_scale, double x_canvas_shift, double y_canvas_shift, double focus_distance, double camera_distance)
 			: x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
-			, canvas_scale_(canvas_scale), focus_distance_(focus_distance) { }
+			, canvas_scale_(canvas_scale), focus_distance_(focus_distance), camera_distance_(camera_distance) { }
 
 		std::unique_ptr<Figure> CreateHexahedron(double edge_len) {
 			return CreateFigure(FiguresConstructors::HexahedronConstructor(edge_len));
@@ -183,11 +184,11 @@ namespace Figures3D {
 
 	protected:
 		std::unique_ptr<Figure> CreateFigure(const FiguresConstructors::FigureConstructor& constructor) const {
-			return std::make_unique<Figure>(constructor, canvas_scale_, x_canvas_shift_, y_canvas_shift_, focus_distance_);
+			return std::make_unique<Figure>(constructor, canvas_scale_, x_canvas_shift_, y_canvas_shift_, focus_distance_, camera_distance_);
 		}
 
 	protected:
 		double x_canvas_shift_, y_canvas_shift_, canvas_scale_;
-		double focus_distance_;
+		double focus_distance_, camera_distance_;
 	};
 }

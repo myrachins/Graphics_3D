@@ -35,6 +35,9 @@ namespace CanvasUtils {
 		static double GetCanvasScale() {
 			return 80;
 		}
+		static double GetCameraDistance() {
+			return 500;
+		}
 	};
 
 	template <typename T>

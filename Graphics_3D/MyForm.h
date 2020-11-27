@@ -477,7 +477,8 @@ namespace Graphics3D {
 			Figures3D::FuguresFabric fabric (
 				ApplicationSettings::GetCanvasScale(),
 				pictureBox->Width / 2, pictureBox->Height / 2,
-				ApplicationSettings::GetFocusDistance());
+				ApplicationSettings::GetFocusDistance(),
+				ApplicationSettings::GetCameraDistance());
 
 			if (mode == "Hexahedron") {
 				current_figure.Reset(fabric.CreateHexahedron(2).release());
