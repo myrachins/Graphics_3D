@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 #include "Models.h"
 #include "Operations.h"
@@ -11,6 +12,7 @@
 namespace Figures3D {
 	using namespace System::Drawing;
 	using Models3D::Point3D;
+	using Models3D::Polygon3D;
 	using Models3D::CanvasCoordinate;
 
 	class Figure {
@@ -37,11 +39,18 @@ namespace Figures3D {
 		}
 
 		void TakeOrthogonalProjection(Bitmap^ bm) const {
-			TakeProjection(bm, coords_);
+			TakeProjection(bm, coords_, polygons_);
+		}
+		void TakeOnlyVisibleOrthogonalProjection(Bitmap^ bm) const {
+			TakeProjection(bm, coords_, GetOnlyVisiblePlygons());
 		}
 		void TakePerspectiveProjection(Bitmap^ bm) const {
 			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
-			TakeProjection(bm, transformed_coords);
+			TakeProjection(bm, transformed_coords, polygons_);
+		}
+		void TakeOnlyVisiblePerspectiveProjection(Bitmap^ bm) const {
+			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
+			TakeProjection(bm, transformed_coords, GetOnlyVisiblePlygons());
 		}
 
 		void Shift(double dx, double dy, double dz) {
@@ -70,12 +79,9 @@ namespace Figures3D {
 			}
 		}
 
-		void TakeProjection(Bitmap^ bm, const std::vector<Point3D>& coords) const {
+		void TakeProjection(Bitmap^ bm, const std::vector<Point3D>& coords, const std::vector<Polygon3D>& polygons) const {
 			std::vector<Models3D::CanvasPolygon> canvas_polygons;
-			for (const Models3D::Polygon3D& polygon : polygons_) {
-				if (!IsPolygonVisible(polygon)) {
-					continue;
-				}
+			for (const Polygon3D& polygon : polygons) {
 				std::vector<CanvasCoordinate> current_polygon_coords;
 				for (const Point3D* point : polygon.GetCoords(coords)) {
 					Point3D transformed_point = Operations3D::Apply(*point, Operations3D::OrthogonalZProjection());
@@ -99,7 +105,7 @@ namespace Figures3D {
 			};
 		}
 
-		bool IsPolygonVisible(const Models3D::Polygon3D& polygon) const {
+		bool IsPolygonVisible(const Polygon3D& polygon) const {
 			Models3D::PlaneEquation plane = polygon.GetPlaneEquation(coords_);
 			Point3D centroid = Get—entroid();
 
@@ -108,6 +114,15 @@ namespace Figures3D {
 			Point3D view_point = GetViewPoint();
 
 			return (plane.a * view_point.x + plane.b * view_point.y + plane.c * view_point.z + plane.d) > 0;
+		}
+
+		std::vector<Polygon3D> GetOnlyVisiblePlygons() const {
+			std::vector<Polygon3D> only_visible;
+			std::copy_if(polygons_.begin(), polygons_.end(), std::back_inserter(only_visible),
+				[&](const Polygon3D& polygon) {
+				return IsPolygonVisible(polygon);
+			});
+			return only_visible;
 		}
 		
 		Point3D Get—entroid() const {
@@ -131,7 +146,7 @@ namespace Figures3D {
 		
 	protected:
 		std::vector<Point3D> coords_;
-		std::vector<Models3D::Polygon3D> polygons_;
+		std::vector<Polygon3D> polygons_;
 		double x_canvas_shift_, y_canvas_shift_, canvas_scale_;
 		double focus_distance_;
 	};

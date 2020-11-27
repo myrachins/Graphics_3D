@@ -31,6 +31,7 @@ namespace Graphics2 {
 			shiftComboBox->SelectedIndex = 0;
 			scaleComboBox->SelectedIndex = 0;
 			projectionComboBox->SelectedIndex = 0;
+			figuresVisibilityComboBox->SelectedIndex = 0;
 
 			ResetFigure();
 			UpdateFigureView(*current_figure);
@@ -73,6 +74,7 @@ namespace Graphics2 {
 	private: System::Windows::Forms::Label^  ZcLabel;
 	private: System::Windows::Forms::TextBox^  focusDistanceTextBox;
 	private: System::Windows::Forms::ComboBox^  figureComboBox;
+	private: System::Windows::Forms::ComboBox^  figuresVisibilityComboBox;
 
 	private:
 		/// <summary>
@@ -105,6 +107,7 @@ namespace Graphics2 {
 			this->moreScaleButton = (gcnew System::Windows::Forms::Button());
 			this->lessScaleButton = (gcnew System::Windows::Forms::Button());
 			this->projectionGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->figuresVisibilityComboBox = (gcnew System::Windows::Forms::ComboBox());
 			this->ZcLabel = (gcnew System::Windows::Forms::Label());
 			this->focusDistanceTextBox = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox))->BeginInit();
@@ -119,7 +122,7 @@ namespace Graphics2 {
 			// 
 			this->pictureBox->Location = System::Drawing::Point(12, 64);
 			this->pictureBox->Name = L"pictureBox";
-			this->pictureBox->Size = System::Drawing::Size(1028, 469);
+			this->pictureBox->Size = System::Drawing::Size(1117, 564);
 			this->pictureBox->TabIndex = 0;
 			this->pictureBox->TabStop = false;
 			// 
@@ -169,7 +172,7 @@ namespace Graphics2 {
 			// 
 			this->utilsGroupBox->Controls->Add(this->figureComboBox);
 			this->utilsGroupBox->Controls->Add(this->resetButton);
-			this->utilsGroupBox->Location = System::Drawing::Point(855, 8);
+			this->utilsGroupBox->Location = System::Drawing::Point(944, 8);
 			this->utilsGroupBox->Name = L"utilsGroupBox";
 			this->utilsGroupBox->Size = System::Drawing::Size(185, 50);
 			this->utilsGroupBox->TabIndex = 3;
@@ -297,15 +300,27 @@ namespace Graphics2 {
 			// 
 			// projectionGroupBox
 			// 
+			this->projectionGroupBox->Controls->Add(this->figuresVisibilityComboBox);
 			this->projectionGroupBox->Controls->Add(this->ZcLabel);
 			this->projectionGroupBox->Controls->Add(this->focusDistanceTextBox);
 			this->projectionGroupBox->Controls->Add(this->projectionComboBox);
 			this->projectionGroupBox->Location = System::Drawing::Point(666, 8);
 			this->projectionGroupBox->Name = L"projectionGroupBox";
-			this->projectionGroupBox->Size = System::Drawing::Size(183, 50);
+			this->projectionGroupBox->Size = System::Drawing::Size(272, 50);
 			this->projectionGroupBox->TabIndex = 6;
 			this->projectionGroupBox->TabStop = false;
 			this->projectionGroupBox->Text = L"Projection";
+			// 
+			// figuresVisibilityComboBox
+			// 
+			this->figuresVisibilityComboBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->figuresVisibilityComboBox->FormattingEnabled = true;
+			this->figuresVisibilityComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(2) { L"Only visible", L"Whole figure" });
+			this->figuresVisibilityComboBox->Location = System::Drawing::Point(171, 18);
+			this->figuresVisibilityComboBox->Name = L"figuresVisibilityComboBox";
+			this->figuresVisibilityComboBox->Size = System::Drawing::Size(95, 21);
+			this->figuresVisibilityComboBox->TabIndex = 3;
+			this->figuresVisibilityComboBox->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::figuresVisibilityComboBox_SelectedIndexChanged);
 			// 
 			// ZcLabel
 			// 
@@ -328,7 +343,7 @@ namespace Graphics2 {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1052, 545);
+			this->ClientSize = System::Drawing::Size(1141, 640);
 			this->Controls->Add(this->projectionGroupBox);
 			this->Controls->Add(this->scaleGroupBox);
 			this->Controls->Add(this->shiftGroupBox);
@@ -385,6 +400,9 @@ namespace Graphics2 {
 		private: System::Void projectionComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
 			UpdateFigureView(*current_figure);
 		}
+		private: System::Void figuresVisibilityComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+			UpdateFigureView(*current_figure);
+		}
 		private: System::Void figureComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
 			ResetFigure();
 			UpdateFigureView(*current_figure);
@@ -432,11 +450,22 @@ namespace Graphics2 {
 
 		void UpdateFigureView(const Figures3D::Figure& figure) {
 			ClearImage();
-			String^ mode = (String^)projectionComboBox->SelectedItem;
-			if (mode == "Perspective") {
-				figure.TakePerspectiveProjection(bm);
-			} else if (mode == "Orthogonal") {
-				figure.TakeOrthogonalProjection(bm);
+			String^ projection_mode = (String^)projectionComboBox->SelectedItem;
+			String^ visibility_mode = (String^)figuresVisibilityComboBox->SelectedItem;
+			bool is_perspective_mode = projection_mode == "Perspective";
+			bool is_only_visible_mode = visibility_mode == "Only visible";
+			if (is_perspective_mode) {
+				if (is_only_visible_mode) {
+					figure.TakeOnlyVisiblePerspectiveProjection(bm);
+				} else {
+					figure.TakePerspectiveProjection(bm);
+				}
+			} else {
+				if (is_only_visible_mode) {
+					figure.TakeOnlyVisibleOrthogonalProjection(bm);
+				} else {
+					figure.TakeOrthogonalProjection(bm);
+				}
 			}
 			pictureBox->Refresh();
 		}
