@@ -3,7 +3,7 @@
 #include "Figures.h"
 #include "CanvasUtils.h"
 
-namespace Graphics2 {
+namespace Graphics3D {
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -75,6 +75,11 @@ namespace Graphics2 {
 	private: System::Windows::Forms::TextBox^  focusDistanceTextBox;
 	private: System::Windows::Forms::ComboBox^  figureComboBox;
 	private: System::Windows::Forms::ComboBox^  figuresVisibilityComboBox;
+	private: System::Windows::Forms::MenuStrip^  mainMenu;
+
+	private: System::Windows::Forms::ToolStripMenuItem^  fileToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^  helpToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^  aboutToolStripMenuItem;
 
 	private:
 		/// <summary>
@@ -110,19 +115,24 @@ namespace Graphics2 {
 			this->figuresVisibilityComboBox = (gcnew System::Windows::Forms::ComboBox());
 			this->ZcLabel = (gcnew System::Windows::Forms::Label());
 			this->focusDistanceTextBox = (gcnew System::Windows::Forms::TextBox());
+			this->mainMenu = (gcnew System::Windows::Forms::MenuStrip());
+			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->helpToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox))->BeginInit();
 			this->rotateGroupBox->SuspendLayout();
 			this->utilsGroupBox->SuspendLayout();
 			this->shiftGroupBox->SuspendLayout();
 			this->scaleGroupBox->SuspendLayout();
 			this->projectionGroupBox->SuspendLayout();
+			this->mainMenu->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// pictureBox
 			// 
-			this->pictureBox->Location = System::Drawing::Point(12, 64);
+			this->pictureBox->Location = System::Drawing::Point(12, 83);
 			this->pictureBox->Name = L"pictureBox";
-			this->pictureBox->Size = System::Drawing::Size(1117, 564);
+			this->pictureBox->Size = System::Drawing::Size(1117, 587);
 			this->pictureBox->TabIndex = 0;
 			this->pictureBox->TabStop = false;
 			// 
@@ -131,7 +141,7 @@ namespace Graphics2 {
 			this->rotateGroupBox->Controls->Add(this->rotateComboBox);
 			this->rotateGroupBox->Controls->Add(this->plusAngleButton);
 			this->rotateGroupBox->Controls->Add(this->minusAngleButton);
-			this->rotateGroupBox->Location = System::Drawing::Point(12, 8);
+			this->rotateGroupBox->Location = System::Drawing::Point(12, 27);
 			this->rotateGroupBox->Name = L"rotateGroupBox";
 			this->rotateGroupBox->Size = System::Drawing::Size(212, 50);
 			this->rotateGroupBox->TabIndex = 2;
@@ -172,7 +182,7 @@ namespace Graphics2 {
 			// 
 			this->utilsGroupBox->Controls->Add(this->figureComboBox);
 			this->utilsGroupBox->Controls->Add(this->resetButton);
-			this->utilsGroupBox->Location = System::Drawing::Point(944, 8);
+			this->utilsGroupBox->Location = System::Drawing::Point(944, 27);
 			this->utilsGroupBox->Name = L"utilsGroupBox";
 			this->utilsGroupBox->Size = System::Drawing::Size(185, 50);
 			this->utilsGroupBox->TabIndex = 3;
@@ -219,7 +229,7 @@ namespace Graphics2 {
 			this->shiftGroupBox->Controls->Add(this->shiftComboBox);
 			this->shiftGroupBox->Controls->Add(this->positiveShiftButton);
 			this->shiftGroupBox->Controls->Add(this->negativeShiftButton);
-			this->shiftGroupBox->Location = System::Drawing::Point(230, 8);
+			this->shiftGroupBox->Location = System::Drawing::Point(230, 27);
 			this->shiftGroupBox->Name = L"shiftGroupBox";
 			this->shiftGroupBox->Size = System::Drawing::Size(209, 50);
 			this->shiftGroupBox->TabIndex = 4;
@@ -261,7 +271,7 @@ namespace Graphics2 {
 			this->scaleGroupBox->Controls->Add(this->scaleComboBox);
 			this->scaleGroupBox->Controls->Add(this->moreScaleButton);
 			this->scaleGroupBox->Controls->Add(this->lessScaleButton);
-			this->scaleGroupBox->Location = System::Drawing::Point(445, 8);
+			this->scaleGroupBox->Location = System::Drawing::Point(445, 27);
 			this->scaleGroupBox->Name = L"scaleGroupBox";
 			this->scaleGroupBox->Size = System::Drawing::Size(215, 50);
 			this->scaleGroupBox->TabIndex = 5;
@@ -304,7 +314,7 @@ namespace Graphics2 {
 			this->projectionGroupBox->Controls->Add(this->ZcLabel);
 			this->projectionGroupBox->Controls->Add(this->focusDistanceTextBox);
 			this->projectionGroupBox->Controls->Add(this->projectionComboBox);
-			this->projectionGroupBox->Location = System::Drawing::Point(666, 8);
+			this->projectionGroupBox->Location = System::Drawing::Point(666, 27);
 			this->projectionGroupBox->Name = L"projectionGroupBox";
 			this->projectionGroupBox->Size = System::Drawing::Size(272, 50);
 			this->projectionGroupBox->TabIndex = 6;
@@ -339,17 +349,52 @@ namespace Graphics2 {
 			this->focusDistanceTextBox->TabIndex = 1;
 			this->focusDistanceTextBox->TextChanged += gcnew System::EventHandler(this, &MyForm::focusDistanceTextBox_TextChanged);
 			// 
+			// mainMenu
+			// 
+			this->mainMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->fileToolStripMenuItem,
+					this->helpToolStripMenuItem
+			});
+			this->mainMenu->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::HorizontalStackWithOverflow;
+			this->mainMenu->Location = System::Drawing::Point(0, 0);
+			this->mainMenu->Name = L"mainMenu";
+			this->mainMenu->Size = System::Drawing::Size(1141, 24);
+			this->mainMenu->TabIndex = 7;
+			this->mainMenu->Text = L"mainMenu";
+			// 
+			// fileToolStripMenuItem
+			// 
+			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(37, 20);
+			this->fileToolStripMenuItem->Text = L"File";
+			// 
+			// helpToolStripMenuItem
+			// 
+			this->helpToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->aboutToolStripMenuItem });
+			this->helpToolStripMenuItem->Name = L"helpToolStripMenuItem";
+			this->helpToolStripMenuItem->Size = System::Drawing::Size(44, 20);
+			this->helpToolStripMenuItem->Text = L"Help";
+			// 
+			// aboutToolStripMenuItem
+			// 
+			this->aboutToolStripMenuItem->Name = L"aboutToolStripMenuItem";
+			this->aboutToolStripMenuItem->Size = System::Drawing::Size(180, 22);
+			this->aboutToolStripMenuItem->Text = L"About";
+			this->aboutToolStripMenuItem->Click += gcnew System::EventHandler(this, &MyForm::aboutToolStripMenuItem_Click);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1141, 640);
+			this->ClientSize = System::Drawing::Size(1141, 682);
 			this->Controls->Add(this->projectionGroupBox);
 			this->Controls->Add(this->scaleGroupBox);
 			this->Controls->Add(this->shiftGroupBox);
 			this->Controls->Add(this->utilsGroupBox);
 			this->Controls->Add(this->rotateGroupBox);
 			this->Controls->Add(this->pictureBox);
+			this->Controls->Add(this->mainMenu);
+			this->MainMenuStrip = this->mainMenu;
 			this->Name = L"MyForm";
 			this->Text = L"Rachinskiy, Task #6";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox))->EndInit();
@@ -359,7 +404,10 @@ namespace Graphics2 {
 			this->scaleGroupBox->ResumeLayout(false);
 			this->projectionGroupBox->ResumeLayout(false);
 			this->projectionGroupBox->PerformLayout();
+			this->mainMenu->ResumeLayout(false);
+			this->mainMenu->PerformLayout();
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -506,6 +554,16 @@ namespace Graphics2 {
 				figure.Scale(1, 1, 1, scale);
 			}
 			UpdateFigureView(figure);
+		}
+
+		private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+			String^ info = "Info";
+			String^ message = "This is homework #6. Date: 26/11/2020.\n"
+				"Задание: Платоновы тела\n"
+				"Author: Maxim Rachinskiy. OS: Windows 10\n"
+				"IDE: VS 2017, C++ 17";
+
+			MessageBox::Show(message, info);
 		}
 };
 }
