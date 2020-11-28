@@ -2,6 +2,7 @@
 
 #include "Operations.h"
 #include <cmath>
+#include <memory>
 
 namespace CanvasUtils {
 	using namespace System::Drawing;
@@ -37,6 +38,9 @@ namespace CanvasUtils {
 		}
 		static double GetCameraDistance() {
 			return 500;
+		}
+		static double GetFiguresDefaultSize() {
+			return 2;
 		}
 	};
 
@@ -77,6 +81,9 @@ namespace CanvasUtils {
 				delete m_ptr;
 			}
 			m_ptr = ptr;
+		}
+		void Reset(std::unique_ptr<T> ptr) {
+			Reset(ptr.release());
 		}
 
 	private:

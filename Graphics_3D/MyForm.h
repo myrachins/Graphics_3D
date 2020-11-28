@@ -11,6 +11,9 @@ namespace Graphics3D {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::Collections::Generic;
+
+	using Figures3D::Figure;
 
 	using CanvasUtils::AutoPtr;
 	using CanvasUtils::ApplicationSettings;
@@ -24,6 +27,7 @@ namespace Graphics3D {
 		MyForm(void) {
 			InitializeComponent();
 			bm = gcnew Bitmap(pictureBox->Width, pictureBox->Height);
+			all_figures.Reset(std::make_unique<Figures>());
 			pictureBox->Image = bm;
 
 			figureComboBox->SelectedIndex = 0;
@@ -33,8 +37,10 @@ namespace Graphics3D {
 			projectionComboBox->SelectedIndex = 0;
 			figuresVisibilityComboBox->SelectedIndex = 0;
 
-			ResetFigure();
-			UpdateFigureView(*current_figure);
+			figureSizeTextBox->Text = ApplicationSettings::GetFiguresDefaultSize().ToString();
+
+			ClearImage();
+			SetEnabledForActions(false);
 		}
 
 	protected:
@@ -45,7 +51,7 @@ namespace Graphics3D {
 			if (components) {
 				delete components;
 			}
-			current_figure.Reset();
+			all_figures.Reset();
 		}
 	private: System::Windows::Forms::PictureBox^  pictureBox;
 
@@ -56,7 +62,8 @@ namespace Graphics3D {
 
 	protected:
 		Bitmap^ bm;
-		AutoPtr<Figures3D::Figure> current_figure;
+		typedef std::vector<std::unique_ptr<Figure>> Figures;
+		AutoPtr<Figures> all_figures;
 
 	private: System::Windows::Forms::GroupBox^  utilsGroupBox;
 	private: System::Windows::Forms::ComboBox^  projectionComboBox;
@@ -80,6 +87,13 @@ namespace Graphics3D {
 	private: System::Windows::Forms::ToolStripMenuItem^  fileToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  helpToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  aboutToolStripMenuItem;
+	private: System::Windows::Forms::Label^  sizeLabel;
+	private: System::Windows::Forms::TextBox^  figureSizeTextBox;
+	private: System::Windows::Forms::GroupBox^  figuresGroupBox;
+	private: System::Windows::Forms::Button^  addFigureButton;
+
+	private: System::Windows::Forms::Button^  clearButton;
+
 
 	private:
 		/// <summary>
@@ -100,8 +114,11 @@ namespace Graphics3D {
 			this->plusAngleButton = (gcnew System::Windows::Forms::Button());
 			this->minusAngleButton = (gcnew System::Windows::Forms::Button());
 			this->utilsGroupBox = (gcnew System::Windows::Forms::GroupBox());
-			this->figureComboBox = (gcnew System::Windows::Forms::ComboBox());
+			this->clearButton = (gcnew System::Windows::Forms::Button());
 			this->resetButton = (gcnew System::Windows::Forms::Button());
+			this->sizeLabel = (gcnew System::Windows::Forms::Label());
+			this->figureSizeTextBox = (gcnew System::Windows::Forms::TextBox());
+			this->figureComboBox = (gcnew System::Windows::Forms::ComboBox());
 			this->projectionComboBox = (gcnew System::Windows::Forms::ComboBox());
 			this->shiftGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			this->shiftComboBox = (gcnew System::Windows::Forms::ComboBox());
@@ -119,6 +136,8 @@ namespace Graphics3D {
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->helpToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->figuresGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->addFigureButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox))->BeginInit();
 			this->rotateGroupBox->SuspendLayout();
 			this->utilsGroupBox->SuspendLayout();
@@ -126,13 +145,14 @@ namespace Graphics3D {
 			this->scaleGroupBox->SuspendLayout();
 			this->projectionGroupBox->SuspendLayout();
 			this->mainMenu->SuspendLayout();
+			this->figuresGroupBox->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// pictureBox
 			// 
 			this->pictureBox->Location = System::Drawing::Point(12, 83);
 			this->pictureBox->Name = L"pictureBox";
-			this->pictureBox->Size = System::Drawing::Size(1117, 587);
+			this->pictureBox->Size = System::Drawing::Size(1382, 587);
 			this->pictureBox->TabIndex = 0;
 			this->pictureBox->TabStop = false;
 			// 
@@ -180,14 +200,51 @@ namespace Graphics3D {
 			// 
 			// utilsGroupBox
 			// 
-			this->utilsGroupBox->Controls->Add(this->figureComboBox);
+			this->utilsGroupBox->Controls->Add(this->clearButton);
 			this->utilsGroupBox->Controls->Add(this->resetButton);
-			this->utilsGroupBox->Location = System::Drawing::Point(944, 27);
+			this->utilsGroupBox->Location = System::Drawing::Point(1217, 27);
 			this->utilsGroupBox->Name = L"utilsGroupBox";
-			this->utilsGroupBox->Size = System::Drawing::Size(185, 50);
+			this->utilsGroupBox->Size = System::Drawing::Size(177, 50);
 			this->utilsGroupBox->TabIndex = 3;
 			this->utilsGroupBox->TabStop = false;
 			this->utilsGroupBox->Text = L"Utils";
+			// 
+			// clearButton
+			// 
+			this->clearButton->Location = System::Drawing::Point(90, 16);
+			this->clearButton->Name = L"clearButton";
+			this->clearButton->Size = System::Drawing::Size(75, 23);
+			this->clearButton->TabIndex = 2;
+			this->clearButton->Text = L"Clear";
+			this->clearButton->UseVisualStyleBackColor = true;
+			this->clearButton->Click += gcnew System::EventHandler(this, &MyForm::clearButton_Click);
+			// 
+			// resetButton
+			// 
+			this->resetButton->Location = System::Drawing::Point(9, 16);
+			this->resetButton->Name = L"resetButton";
+			this->resetButton->Size = System::Drawing::Size(75, 23);
+			this->resetButton->TabIndex = 1;
+			this->resetButton->Text = L"Reset";
+			this->resetButton->UseVisualStyleBackColor = true;
+			this->resetButton->Click += gcnew System::EventHandler(this, &MyForm::resetButton_Click);
+			// 
+			// sizeLabel
+			// 
+			this->sizeLabel->AutoSize = true;
+			this->sizeLabel->Location = System::Drawing::Point(6, 23);
+			this->sizeLabel->Name = L"sizeLabel";
+			this->sizeLabel->Size = System::Drawing::Size(30, 13);
+			this->sizeLabel->TabIndex = 4;
+			this->sizeLabel->Text = L"Size:";
+			// 
+			// figureSizeTextBox
+			// 
+			this->figureSizeTextBox->Location = System::Drawing::Point(42, 19);
+			this->figureSizeTextBox->Name = L"figureSizeTextBox";
+			this->figureSizeTextBox->Size = System::Drawing::Size(36, 20);
+			this->figureSizeTextBox->TabIndex = 3;
+			this->figureSizeTextBox->TextChanged += gcnew System::EventHandler(this, &MyForm::figureSizeTextBox_TextChanged);
 			// 
 			// figureComboBox
 			// 
@@ -197,21 +254,10 @@ namespace Graphics3D {
 				L"Hexahedron", L"Tetrahedron", L"Octahedron",
 					L"Icosahedron", L"Dodecahedron", L"Sphere"
 			});
-			this->figureComboBox->Location = System::Drawing::Point(6, 19);
+			this->figureComboBox->Location = System::Drawing::Point(84, 18);
 			this->figureComboBox->Name = L"figureComboBox";
 			this->figureComboBox->Size = System::Drawing::Size(92, 21);
 			this->figureComboBox->TabIndex = 2;
-			this->figureComboBox->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::figureComboBox_SelectedIndexChanged);
-			// 
-			// resetButton
-			// 
-			this->resetButton->Location = System::Drawing::Point(104, 18);
-			this->resetButton->Name = L"resetButton";
-			this->resetButton->Size = System::Drawing::Size(75, 23);
-			this->resetButton->TabIndex = 1;
-			this->resetButton->Text = L"Reset";
-			this->resetButton->UseVisualStyleBackColor = true;
-			this->resetButton->Click += gcnew System::EventHandler(this, &MyForm::resetButton_Click);
 			// 
 			// projectionComboBox
 			// 
@@ -358,7 +404,7 @@ namespace Graphics3D {
 			this->mainMenu->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::HorizontalStackWithOverflow;
 			this->mainMenu->Location = System::Drawing::Point(0, 0);
 			this->mainMenu->Name = L"mainMenu";
-			this->mainMenu->Size = System::Drawing::Size(1141, 24);
+			this->mainMenu->Size = System::Drawing::Size(1406, 24);
 			this->mainMenu->TabIndex = 7;
 			this->mainMenu->Text = L"mainMenu";
 			// 
@@ -378,19 +424,43 @@ namespace Graphics3D {
 			// aboutToolStripMenuItem
 			// 
 			this->aboutToolStripMenuItem->Name = L"aboutToolStripMenuItem";
-			this->aboutToolStripMenuItem->Size = System::Drawing::Size(180, 22);
+			this->aboutToolStripMenuItem->Size = System::Drawing::Size(107, 22);
 			this->aboutToolStripMenuItem->Text = L"About";
 			this->aboutToolStripMenuItem->Click += gcnew System::EventHandler(this, &MyForm::aboutToolStripMenuItem_Click);
+			// 
+			// figuresGroupBox
+			// 
+			this->figuresGroupBox->Controls->Add(this->addFigureButton);
+			this->figuresGroupBox->Controls->Add(this->figureComboBox);
+			this->figuresGroupBox->Controls->Add(this->figureSizeTextBox);
+			this->figuresGroupBox->Controls->Add(this->sizeLabel);
+			this->figuresGroupBox->Location = System::Drawing::Point(944, 27);
+			this->figuresGroupBox->Name = L"figuresGroupBox";
+			this->figuresGroupBox->Size = System::Drawing::Size(267, 50);
+			this->figuresGroupBox->TabIndex = 8;
+			this->figuresGroupBox->TabStop = false;
+			this->figuresGroupBox->Text = L"Figures";
+			// 
+			// addFigureButton
+			// 
+			this->addFigureButton->Location = System::Drawing::Point(182, 17);
+			this->addFigureButton->Name = L"addFigureButton";
+			this->addFigureButton->Size = System::Drawing::Size(75, 23);
+			this->addFigureButton->TabIndex = 5;
+			this->addFigureButton->Text = L"Add Figure";
+			this->addFigureButton->UseVisualStyleBackColor = true;
+			this->addFigureButton->Click += gcnew System::EventHandler(this, &MyForm::addFigureButton_Click);
 			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1141, 682);
+			this->ClientSize = System::Drawing::Size(1406, 682);
+			this->Controls->Add(this->figuresGroupBox);
 			this->Controls->Add(this->projectionGroupBox);
 			this->Controls->Add(this->scaleGroupBox);
-			this->Controls->Add(this->shiftGroupBox);
 			this->Controls->Add(this->utilsGroupBox);
+			this->Controls->Add(this->shiftGroupBox);
 			this->Controls->Add(this->rotateGroupBox);
 			this->Controls->Add(this->pictureBox);
 			this->Controls->Add(this->mainMenu);
@@ -406,6 +476,8 @@ namespace Graphics3D {
 			this->projectionGroupBox->PerformLayout();
 			this->mainMenu->ResumeLayout(false);
 			this->mainMenu->PerformLayout();
+			this->figuresGroupBox->ResumeLayout(false);
+			this->figuresGroupBox->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -413,52 +485,67 @@ namespace Graphics3D {
 #pragma endregion
 
 		private: System::Void minusAngleButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			RotateFigure(*current_figure, -ApplicationSettings::GetRotateAngle());
+			RotateFigure(GetCurrentFigure(), -ApplicationSettings::GetRotateAngle());
 		}
 		private: System::Void plusAngleButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			RotateFigure(*current_figure, ApplicationSettings::GetRotateAngle());
+			RotateFigure(GetCurrentFigure(), ApplicationSettings::GetRotateAngle());
 		}
 
 		private: System::Void negativeShiftButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			ShiftFigure(*current_figure, -ApplicationSettings::GetShiftDelta());
+			ShiftFigure(GetCurrentFigure(), -ApplicationSettings::GetShiftDelta());
 		}
 		private: System::Void positiveShiftButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			ShiftFigure(*current_figure, ApplicationSettings::GetShiftDelta());
+			ShiftFigure(GetCurrentFigure(), ApplicationSettings::GetShiftDelta());
 		}
 
 		private: System::Void lessScaleButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			ScaleFigure(*current_figure, 1 / ApplicationSettings::GetScale());
+			ScaleFigure(GetCurrentFigure(), 1 / ApplicationSettings::GetScale());
 		}
 		private: System::Void moreScaleButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			ScaleFigure(*current_figure, ApplicationSettings::GetScale());
+			ScaleFigure(GetCurrentFigure(), ApplicationSettings::GetScale());
 		}
 
 		private: System::Void focusDistanceTextBox_TextChanged(System::Object^  sender, System::EventArgs^  e) {
 			double new_focus_distance = 0;
 			if (Double::TryParse(focusDistanceTextBox->Text, new_focus_distance)
 				&& new_focus_distance > 0 && new_focus_distance != 1) {
-				current_figure->SetFocusDistance(new_focus_distance);
 				focusDistanceTextBox->BackColor = Color::White;
-				UpdateFigureView(*current_figure);
+				GetCurrentFigure().SetFocusDistance(new_focus_distance);
+				UpdateFiguresView();
 			} else {
 				focusDistanceTextBox->BackColor = Color::Red;
 			}
 		}
 
-		private: System::Void projectionComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-			UpdateFigureView(*current_figure);
-		}
-		private: System::Void figuresVisibilityComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-			UpdateFigureView(*current_figure);
-		}
-		private: System::Void figureComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-			ResetFigure();
-			UpdateFigureView(*current_figure);
+		private: System::Void figureSizeTextBox_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+			bool is_figure_size_correct = IsFigureSizeCorrect();
+			figureSizeTextBox->BackColor = is_figure_size_correct ? Color::White : Color::Red;
+			addFigureButton->Enabled = is_figure_size_correct;
 		}
 
+		private: System::Void projectionComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+			UpdateFiguresView();
+		}
+		private: System::Void figuresVisibilityComboBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+			UpdateFiguresView();
+		}
+
+		private: System::Void clearButton_Click(System::Object^  sender, System::EventArgs^  e) {
+			SetEnabledForActions(false);
+			all_figures->clear();
+			ClearImage();
+		}
 		private: System::Void resetButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			ResetFigure();
-			UpdateFigureView(*current_figure);
+			if (!all_figures->empty()) {
+				all_figures->pop_back();
+				AddFigure(ApplicationSettings::GetFiguresDefaultSize());
+				UpdateFiguresView();
+			}
+		}
+		private: System::Void addFigureButton_Click(System::Object^  sender, System::EventArgs^  e) {
+			AddFigure(Double::Parse(figureSizeTextBox->Text));
+			UpdateFiguresView();
+			SetEnabledForActions(true);
 		}
 
 	protected:
@@ -472,33 +559,48 @@ namespace Graphics3D {
 			pictureBox->Refresh();
 		}
 
-		void ResetFigure() {
+		Figure& GetCurrentFigure() {
+			return *(all_figures->back());
+		}
+
+		void AddFigure(size_t figure_size) {
 			String^ mode = (String^)figureComboBox->SelectedItem;
-			Figures3D::FuguresFabric fabric (
+			Figures3D::FuguresFabric fabric(
 				ApplicationSettings::GetCanvasScale(),
 				pictureBox->Width / 2, pictureBox->Height / 2,
 				ApplicationSettings::GetFocusDistance(),
 				ApplicationSettings::GetCameraDistance());
 
 			if (mode == "Hexahedron") {
-				current_figure.Reset(fabric.CreateHexahedron(2).release());
-			} else if (mode == "Tetrahedron") {
-				current_figure.Reset(fabric.CreateTetrahedron(2).release());
-			} else if (mode == "Octahedron") {
-				current_figure.Reset(fabric.CreateOctahedron(2).release());
-			} else if (mode == "Icosahedron") {
-				current_figure.Reset(fabric.CreateIcosahedron(2).release());
-			} else if (mode == "Dodecahedron") {
-				current_figure.Reset(fabric.CreateDodecahedron(2).release());
-			} else if (mode == "Sphere") {
-				current_figure.Reset(fabric.CreateSphere(2).release());
+				all_figures->push_back(fabric.CreateHexahedron(figure_size));
+			}
+			else if (mode == "Tetrahedron") {
+				all_figures->push_back(fabric.CreateTetrahedron(figure_size));
+			}
+			else if (mode == "Octahedron") {
+				all_figures->push_back(fabric.CreateOctahedron(figure_size));
+			}
+			else if (mode == "Icosahedron") {
+				all_figures->push_back(fabric.CreateIcosahedron(figure_size));
+			}
+			else if (mode == "Dodecahedron") {
+				all_figures->push_back(fabric.CreateDodecahedron(figure_size));
+			}
+			else if (mode == "Sphere") {
+				all_figures->push_back(fabric.CreateSphere(figure_size));
 			}
 			focusDistanceTextBox->Text = ApplicationSettings::GetFocusDistance().ToString();
 			focusDistanceTextBox->BackColor = Color::White;
 		}
 
-		void UpdateFigureView(const Figures3D::Figure& figure) {
+		void UpdateFiguresView() {
 			ClearImage();
+			for (const auto& figure : *all_figures) {
+				UpdateFigureView(*figure);
+			}
+		}
+
+		void UpdateFigureView(const Figures3D::Figure& figure) {
 			String^ projection_mode = (String^)projectionComboBox->SelectedItem;
 			String^ visibility_mode = (String^)figuresVisibilityComboBox->SelectedItem;
 			bool is_perspective_mode = projection_mode == "Perspective";
@@ -519,6 +621,12 @@ namespace Graphics3D {
 			pictureBox->Refresh();
 		}
 
+		bool IsFigureSizeCorrect() {
+			double new_figure_size = 0;
+
+			return Double::TryParse(figureSizeTextBox->Text, new_figure_size) && new_figure_size > 0;
+		}
+
 		void RotateFigure(Figures3D::Figure& figure, double angle) {
 			String^ mode = (String^)rotateComboBox->SelectedItem;
 			if (mode == "X") {
@@ -528,7 +636,7 @@ namespace Graphics3D {
 			} else if (mode == "Z") {
 				figure.RotateZ(angle);
 			}
-			UpdateFigureView(figure);
+			UpdateFiguresView();
 		}
 
 		void ShiftFigure(Figures3D::Figure& figure, double delta) {
@@ -540,7 +648,7 @@ namespace Graphics3D {
 			} else if (mode == "Z") {
 				figure.Shift(0, 0, delta);
 			}
-			UpdateFigureView(figure);
+			UpdateFiguresView();
 		}
 
 		void ScaleFigure(Figures3D::Figure& figure, double scale) {
@@ -554,7 +662,27 @@ namespace Graphics3D {
 			} else if (mode == "All") {
 				figure.Scale(1, 1, 1, scale);
 			}
-			UpdateFigureView(figure);
+			UpdateFiguresView();
+		}
+
+		void SetEnabledForActions(bool enabled) {
+			minusAngleButton->Enabled = enabled;
+			plusAngleButton->Enabled = enabled;
+			rotateComboBox->Enabled = enabled;
+
+			negativeShiftButton->Enabled = enabled;
+			positiveShiftButton->Enabled = enabled;
+			shiftComboBox->Enabled = enabled;
+
+			lessScaleButton->Enabled = enabled;
+			moreScaleButton->Enabled = enabled;
+			scaleComboBox->Enabled = enabled;
+
+			focusDistanceTextBox->Enabled = enabled;
+			projectionComboBox->Enabled = enabled;
+			figuresVisibilityComboBox->Enabled = enabled;
+
+			resetButton->Enabled = enabled;
 		}
 
 		private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
