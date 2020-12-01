@@ -178,8 +178,12 @@ namespace Figures3D {
 			return CreateFigure(FiguresConstructors::SphereConstructor(radius));
 		}
 
-		std::unique_ptr<Figure> CreateDodecahedron(double radius) {
-			return CreateFigure(FiguresConstructors::DodecahedronConstructor(radius));
+		std::unique_ptr<Figure> CreateDodecahedron(double edge_len) {
+			return CreateFigure(FiguresConstructors::DodecahedronConstructor(edge_len));
+		}
+
+		std::unique_ptr<Figure> CreateTorus(double big_r, double small_r) {
+			return CreateFigure(FiguresConstructors::TorusConstructor(big_r, small_r));
 		}
 
 	protected:

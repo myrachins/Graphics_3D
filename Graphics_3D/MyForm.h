@@ -250,9 +250,9 @@ namespace Graphics3D {
 			// 
 			this->figureComboBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->figureComboBox->FormattingEnabled = true;
-			this->figureComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(6) {
+			this->figureComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
 				L"Hexahedron", L"Tetrahedron", L"Octahedron",
-					L"Icosahedron", L"Dodecahedron", L"Sphere"
+					L"Icosahedron", L"Dodecahedron", L"Sphere", L"Torus"
 			});
 			this->figureComboBox->Location = System::Drawing::Point(84, 18);
 			this->figureComboBox->Name = L"figureComboBox";
@@ -588,6 +588,9 @@ namespace Graphics3D {
 			}
 			else if (mode == "Sphere") {
 				all_figures->push_back(fabric.CreateSphere(figure_size));
+			}
+			else if (mode == "Torus") {
+				all_figures->push_back(fabric.CreateTorus(2, 1)); // TODO
 			}
 			focusDistanceTextBox->Text = ApplicationSettings::GetFocusDistance().ToString();
 			focusDistanceTextBox->BackColor = Color::White;

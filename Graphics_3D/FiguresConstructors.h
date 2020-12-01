@@ -280,6 +280,72 @@ namespace FiguresConstructors {
 		double edge_len_;
 		const double PI = std::acos(-1);
 	};
+
+	class TorusConstructor : public FigureConstructor {
+	public:
+		TorusConstructor(double big_r, double small_r)
+			: big_r_(big_r), small_r_(small_r) { }
+
+		std::vector<Models3D::Point3D> ConstructCoords() const override {
+			std::vector<Models3D::Point3D> coords;
+
+			for (double nu = 0; nu <= 2 * PI; nu += STEP) {
+				for (double teta = 0; teta <= 2 * PI; teta += STEP) {
+					coords.push_back({
+					(big_r_ + small_r_ * std::cos(teta)) * std::cos(nu),
+					(big_r_ + small_r_ * std::cos(teta)) * std::sin(nu),
+					small_r_ * std::sin(teta) });
+				}
+			}
+			return coords;
+		}
+
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
+			std::vector<Models3D::Polygon3D> polygons;
+			const size_t vert_shift = GetStepsNumberInVertical();
+			const size_t number_of_shifts = ConstructCoords().size() / vert_shift;
+
+			for (size_t shift_num = 0; shift_num + 1 < number_of_shifts; ++shift_num) {
+				size_t current_shift = shift_num * vert_shift;
+				for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
+					size_t i = local_i + current_shift;
+					polygons.push_back(Models3D::Polygon3D({ i, i + 1, i + vert_shift }));
+					polygons.push_back(Models3D::Polygon3D({ i + 1, i + vert_shift, i + 1 + vert_shift }));
+				}
+				if (vert_shift > 1) {
+					size_t last_i = vert_shift - 1 + current_shift;
+					polygons.push_back(Models3D::Polygon3D({ last_i, current_shift, last_i + vert_shift }));
+					polygons.push_back(Models3D::Polygon3D({ current_shift, last_i + vert_shift, current_shift + vert_shift }));
+				}
+			}
+			if (number_of_shifts > 1) {
+				size_t current_shift = (number_of_shifts - 1) * vert_shift;
+				for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
+					size_t i = local_i + current_shift;
+					polygons.push_back(Models3D::Polygon3D({ i, i + 1, local_i }));
+					polygons.push_back(Models3D::Polygon3D({ i + 1, local_i, local_i + 1 }));
+				}
+				if (vert_shift > 1) {
+					size_t last_local_i = vert_shift - 1;
+					polygons.push_back(Models3D::Polygon3D({ last_local_i + current_shift, current_shift, last_local_i }));
+					polygons.push_back(Models3D::Polygon3D({ last_local_i, 0, current_shift }));
+				}
+			}
+			return polygons;
+		}
+	protected:
+		size_t GetStepsNumberInVertical() const { // because 2*PI / STEP could fail
+			size_t steps_num = 0;
+			for (double teta = 0; teta <= 2 * PI; teta += STEP) {
+				++steps_num;
+			}
+			return steps_num;
+		}
+	protected:
+		double big_r_, small_r_;
+		const double STEP = 0.15;
+		const double PI = std::acos(-1);
+	};
 }
 
 
