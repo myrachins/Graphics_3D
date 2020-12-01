@@ -3,6 +3,9 @@
 #include "Figures.h"
 #include "CanvasUtils.h"
 
+#include <msclr\marshal_cppstd.h>
+#include <optional>
+
 namespace Graphics3D {
 
 	using namespace System;
@@ -37,6 +40,7 @@ namespace Graphics3D {
 			projectionComboBox->SelectedIndex = 0;
 			figuresVisibilityComboBox->SelectedIndex = 0;
 
+			focusDistanceTextBox->Text = ApplicationSettings::GetFocusDistance().ToString();
 			figureSizeTextBox->Text = ApplicationSettings::GetFiguresDefaultSize().ToString();
 
 			ClearImage();
@@ -64,6 +68,7 @@ namespace Graphics3D {
 		Bitmap^ bm;
 		typedef std::vector<std::unique_ptr<Figure>> Figures;
 		AutoPtr<Figures> all_figures;
+		double current_focus_distance;
 
 	private: System::Windows::Forms::GroupBox^  utilsGroupBox;
 	private: System::Windows::Forms::ComboBox^  projectionComboBox;
@@ -93,6 +98,7 @@ namespace Graphics3D {
 	private: System::Windows::Forms::Button^  addFigureButton;
 
 	private: System::Windows::Forms::Button^  clearButton;
+	private: System::Windows::Forms::Button^  saveFigureButton;
 
 
 	private:
@@ -114,6 +120,7 @@ namespace Graphics3D {
 			this->plusAngleButton = (gcnew System::Windows::Forms::Button());
 			this->minusAngleButton = (gcnew System::Windows::Forms::Button());
 			this->utilsGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->saveFigureButton = (gcnew System::Windows::Forms::Button());
 			this->clearButton = (gcnew System::Windows::Forms::Button());
 			this->resetButton = (gcnew System::Windows::Forms::Button());
 			this->sizeLabel = (gcnew System::Windows::Forms::Label());
@@ -152,7 +159,7 @@ namespace Graphics3D {
 			// 
 			this->pictureBox->Location = System::Drawing::Point(12, 83);
 			this->pictureBox->Name = L"pictureBox";
-			this->pictureBox->Size = System::Drawing::Size(1382, 587);
+			this->pictureBox->Size = System::Drawing::Size(1462, 587);
 			this->pictureBox->TabIndex = 0;
 			this->pictureBox->TabStop = false;
 			// 
@@ -200,18 +207,29 @@ namespace Graphics3D {
 			// 
 			// utilsGroupBox
 			// 
+			this->utilsGroupBox->Controls->Add(this->saveFigureButton);
 			this->utilsGroupBox->Controls->Add(this->clearButton);
 			this->utilsGroupBox->Controls->Add(this->resetButton);
 			this->utilsGroupBox->Location = System::Drawing::Point(1217, 27);
 			this->utilsGroupBox->Name = L"utilsGroupBox";
-			this->utilsGroupBox->Size = System::Drawing::Size(177, 50);
+			this->utilsGroupBox->Size = System::Drawing::Size(257, 50);
 			this->utilsGroupBox->TabIndex = 3;
 			this->utilsGroupBox->TabStop = false;
 			this->utilsGroupBox->Text = L"Utils";
 			// 
+			// saveFigureButton
+			// 
+			this->saveFigureButton->Location = System::Drawing::Point(90, 16);
+			this->saveFigureButton->Name = L"saveFigureButton";
+			this->saveFigureButton->Size = System::Drawing::Size(75, 23);
+			this->saveFigureButton->TabIndex = 3;
+			this->saveFigureButton->Text = L"Save figure";
+			this->saveFigureButton->UseVisualStyleBackColor = true;
+			this->saveFigureButton->Click += gcnew System::EventHandler(this, &MyForm::saveFigureButton_Click);
+			// 
 			// clearButton
 			// 
-			this->clearButton->Location = System::Drawing::Point(90, 16);
+			this->clearButton->Location = System::Drawing::Point(171, 16);
 			this->clearButton->Name = L"clearButton";
 			this->clearButton->Size = System::Drawing::Size(75, 23);
 			this->clearButton->TabIndex = 2;
@@ -250,9 +268,9 @@ namespace Graphics3D {
 			// 
 			this->figureComboBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->figureComboBox->FormattingEnabled = true;
-			this->figureComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
+			this->figureComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(8) {
 				L"Hexahedron", L"Tetrahedron", L"Octahedron",
-					L"Icosahedron", L"Dodecahedron", L"Sphere", L"Torus"
+					L"Icosahedron", L"Dodecahedron", L"Sphere", L"Torus", L"From file"
 			});
 			this->figureComboBox->Location = System::Drawing::Point(84, 18);
 			this->figureComboBox->Name = L"figureComboBox";
@@ -404,7 +422,7 @@ namespace Graphics3D {
 			this->mainMenu->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::HorizontalStackWithOverflow;
 			this->mainMenu->Location = System::Drawing::Point(0, 0);
 			this->mainMenu->Name = L"mainMenu";
-			this->mainMenu->Size = System::Drawing::Size(1406, 24);
+			this->mainMenu->Size = System::Drawing::Size(1488, 24);
 			this->mainMenu->TabIndex = 7;
 			this->mainMenu->Text = L"mainMenu";
 			// 
@@ -455,7 +473,7 @@ namespace Graphics3D {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1406, 682);
+			this->ClientSize = System::Drawing::Size(1488, 682);
 			this->Controls->Add(this->figuresGroupBox);
 			this->Controls->Add(this->projectionGroupBox);
 			this->Controls->Add(this->scaleGroupBox);
@@ -510,7 +528,10 @@ namespace Graphics3D {
 			if (Double::TryParse(focusDistanceTextBox->Text, new_focus_distance)
 				&& new_focus_distance > 0 && new_focus_distance != 1) {
 				focusDistanceTextBox->BackColor = Color::White;
-				GetCurrentFigure().SetFocusDistance(new_focus_distance);
+				current_focus_distance = new_focus_distance;
+				for (const auto& figure : *all_figures) {
+					figure->SetFocusDistance(current_focus_distance);
+				}
 				UpdateFiguresView();
 			} else {
 				focusDistanceTextBox->BackColor = Color::Red;
@@ -537,15 +558,21 @@ namespace Graphics3D {
 		}
 		private: System::Void resetButton_Click(System::Object^  sender, System::EventArgs^  e) {
 			if (!all_figures->empty()) {
-				all_figures->pop_back();
-				AddFigure(ApplicationSettings::GetFiguresDefaultSize());
-				UpdateFiguresView();
+				std::unique_ptr<Figure> new_figure = CreateFigure(ApplicationSettings::GetFiguresDefaultSize());
+				if (new_figure) {
+					all_figures->pop_back();
+					all_figures->push_back(std::move(new_figure));
+					UpdateFiguresView();
+				}
 			}
 		}
 		private: System::Void addFigureButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			AddFigure(Double::Parse(figureSizeTextBox->Text));
-			UpdateFiguresView();
-			SetEnabledForActions(true);
+			std::unique_ptr<Figure> new_figure = CreateFigure(Double::Parse(figureSizeTextBox->Text));
+			if (new_figure) {
+				all_figures->push_back(std::move(new_figure));
+				UpdateFiguresView();
+				SetEnabledForActions(true);
+			}
 		}
 
 	protected:
@@ -563,37 +590,48 @@ namespace Graphics3D {
 			return *(all_figures->back());
 		}
 
-		void AddFigure(size_t figure_size) {
+		std::unique_ptr<Figure> CreateFigure(double figure_size) {
 			String^ mode = (String^)figureComboBox->SelectedItem;
 			Figures3D::FuguresFabric fabric(
 				ApplicationSettings::GetCanvasScale(),
 				pictureBox->Width / 2, pictureBox->Height / 2,
-				ApplicationSettings::GetFocusDistance(),
+				current_focus_distance,
 				ApplicationSettings::GetCameraDistance());
 
 			if (mode == "Hexahedron") {
-				all_figures->push_back(fabric.CreateHexahedron(figure_size));
+				return fabric.CreateHexahedron(figure_size);
 			}
 			else if (mode == "Tetrahedron") {
-				all_figures->push_back(fabric.CreateTetrahedron(figure_size));
+				return fabric.CreateTetrahedron(figure_size);
 			}
 			else if (mode == "Octahedron") {
-				all_figures->push_back(fabric.CreateOctahedron(figure_size));
+				return fabric.CreateOctahedron(figure_size);
 			}
 			else if (mode == "Icosahedron") {
-				all_figures->push_back(fabric.CreateIcosahedron(figure_size));
+				return fabric.CreateIcosahedron(figure_size);
 			}
 			else if (mode == "Dodecahedron") {
-				all_figures->push_back(fabric.CreateDodecahedron(figure_size));
+				return fabric.CreateDodecahedron(figure_size);
 			}
 			else if (mode == "Sphere") {
-				all_figures->push_back(fabric.CreateSphere(figure_size));
+				return fabric.CreateSphere(figure_size);
 			}
 			else if (mode == "Torus") {
-				all_figures->push_back(fabric.CreateTorus(2, 1)); // TODO
+				return fabric.CreateTorus(2, 1); // TODO
 			}
-			focusDistanceTextBox->Text = ApplicationSettings::GetFocusDistance().ToString();
-			focusDistanceTextBox->BackColor = Color::White;
+			else if (mode == "From file") {
+				std::optional<std::string> file_name = GetFileNameFromDialog();
+				if (!file_name.has_value()) {
+					return nullptr;
+				}
+				try {
+					return fabric.CreateFromFile(*file_name);
+				} catch (const std::runtime_error&) {
+					MessageBox::Show("Can't open file", "Error");
+					return nullptr;
+				}
+			}
+			return nullptr;
 		}
 
 		void UpdateFiguresView() {
@@ -686,6 +724,30 @@ namespace Graphics3D {
 			figuresVisibilityComboBox->Enabled = enabled;
 
 			resetButton->Enabled = enabled;
+			saveFigureButton->Enabled = enabled;
+		}
+
+		std::optional<std::string> GetFileNameFromDialog() {
+			OpenFileDialog^ open_file_dialog = gcnew OpenFileDialog();
+			open_file_dialog->Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+
+			if (open_file_dialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+				return msclr::interop::marshal_as<std::string>(open_file_dialog->FileName);
+			}
+			return std::nullopt;
+		}
+
+		private: System::Void saveFigureButton_Click(System::Object^  sender, System::EventArgs^  e) {
+			SaveFileDialog^ save_file_dialog = gcnew SaveFileDialog();
+			save_file_dialog->Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+
+			try {
+				if (save_file_dialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+					GetCurrentFigure().SaveToFile(msclr::interop::marshal_as<std::string>(save_file_dialog->FileName));
+				}
+			} catch(const std::runtime_error&) {
+				MessageBox::Show("Can't write to this file", "Error");
+			}
 		}
 
 		private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {

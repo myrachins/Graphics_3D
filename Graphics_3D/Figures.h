@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 #include "Models.h"
 #include "Operations.h"
@@ -64,6 +66,26 @@ namespace Figures3D {
 
 		void SetFocusDistance(double focus_distance) {
 			focus_distance_ = focus_distance;
+		}
+
+		void SaveToFile(const std::string& file_name) const {
+			std::ofstream file(file_name);
+			if (!file) {
+				throw std::runtime_error("");
+			}
+
+			file << coords_.size() << "\n";
+			for (const Models3D::Point3D& point : coords_) {
+				file << point.x << " " << point.y << " " << point.z << "\n";
+			}
+
+			file << polygons_.size() << "\n";
+			for (const Models3D::Polygon3D& polygon : polygons_) {
+				for (size_t ind : polygon.GetCoordsInds()) {
+					file << ind << " ";
+				}
+				file << "\n";
+			}
 		}
 
 	protected:
@@ -184,6 +206,10 @@ namespace Figures3D {
 
 		std::unique_ptr<Figure> CreateTorus(double big_r, double small_r) {
 			return CreateFigure(FiguresConstructors::TorusConstructor(big_r, small_r));
+		}
+
+		std::unique_ptr<Figure> CreateFromFile(const std::string& file_name) {
+			return CreateFigure(FiguresConstructors::FromFileConstructor(file_name));
 		}
 
 	protected:

@@ -346,6 +346,51 @@ namespace FiguresConstructors {
 		const double STEP = 0.15;
 		const double PI = std::acos(-1);
 	};
+
+	class FromFileConstructor : public FigureConstructor {
+	public:
+		FromFileConstructor(const std::string& file_name) {
+			std::ifstream file(file_name);
+			if (!file) {
+				throw std::runtime_error("");
+			}
+
+			size_t coords_num;
+			file >> coords_num;
+			for (size_t i = 0; i < coords_num; ++i) {
+				double x, y, z;
+				file >> x >> y >> z;
+				coords_.push_back({ x, y, z });
+			}
+
+			size_t polygons_num;
+			file >> polygons_num;
+			file.ignore(1);
+			for (size_t i = 0; i < polygons_num; ++i) {
+				std::string current_line;
+				std::getline(file, current_line);
+				std::stringstream ss(current_line);
+
+				std::vector<size_t> inds;
+				size_t ind;
+				while (ss >> ind) {
+					inds.push_back(ind);
+				}
+				polygons_.push_back({ inds });
+			}
+		}
+
+		std::vector<Models3D::Point3D> ConstructCoords() const override {
+			return coords_;
+		}
+
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
+			return polygons_;
+		}
+	protected:
+		std::vector<Models3D::Point3D> coords_;
+		std::vector<Models3D::Polygon3D> polygons_;
+	};
 }
 
 

@@ -55,6 +55,9 @@ namespace Models3D {
 
 			return plane;
 		}
+		const std::vector<size_t>& GetCoordsInds() const {
+			return coords_inds_;
+		}
 
 	protected:
 		std::vector<size_t> coords_inds_;
