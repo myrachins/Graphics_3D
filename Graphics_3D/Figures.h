@@ -208,6 +208,10 @@ namespace Figures3D {
 			return CreateFigure(FiguresConstructors::TorusConstructor(big_r, small_r));
 		}
 
+		std::unique_ptr<Figure> CreateGarlic(double radius) {
+			return CreateFigure(FiguresConstructors::GarlicConstructor(radius));
+		}
+
 		std::unique_ptr<Figure> CreateFromFile(const std::string& file_name) {
 			return CreateFigure(FiguresConstructors::FromFileConstructor(file_name));
 		}

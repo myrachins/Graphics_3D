@@ -347,6 +347,75 @@ namespace FiguresConstructors {
 		const double PI = std::acos(-1);
 	};
 
+	class GarlicConstructor : public FigureConstructor {
+	public:
+		GarlicConstructor(double radius)
+			: radius_(radius) { }
+
+		std::vector<Models3D::Point3D> ConstructCoords() const override {
+			std::vector<Models3D::Point3D> coords;
+
+			for (double nu = 0; nu <= 2 * PI; nu += STEP) {
+				double coef = 1 + 0.5 * std::abs(std::sin(2 * nu));
+				for (double teta = 0; teta < PI; teta += STEP) {
+					double garlic_z = radius_ * std::cos(teta);
+					if (teta < PI / 2) {
+						garlic_z += radius_ * std::pow((PI / 2 - teta) / (PI / 2), 5);
+					}
+					coords.push_back({
+					radius_ * std::sin(teta) * std::cos(nu) * coef,
+					radius_ * std::sin(teta) * std::sin(nu) * coef,
+					garlic_z });
+				}
+				coords.push_back({
+					radius_ * std::sin(PI) * std::cos(nu) * coef,
+					radius_ * std::sin(PI) * std::sin(nu) * coef,
+					radius_ * std::cos(PI) });
+			}
+			return coords;
+		}
+
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
+			std::vector<Models3D::Polygon3D> polygons;
+			const size_t vert_shift = GetStepsNumberInVertical();
+			const size_t number_of_shifts = ConstructCoords().size() / vert_shift;
+
+			for (size_t shift_num = 0; shift_num + 1 < number_of_shifts; ++shift_num) {
+				size_t current_shift = shift_num * vert_shift;
+				for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
+					size_t i = local_i + current_shift;
+					polygons.push_back(Models3D::Polygon3D({ i, i + 1, i + vert_shift }));
+					if (local_i + 2 != vert_shift) {
+						polygons.push_back(Models3D::Polygon3D({ i + 1, i + vert_shift, i + 1 + vert_shift }));
+					}
+				}
+			}
+			size_t current_shift = (number_of_shifts - 1) * vert_shift;
+			for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
+				size_t i = local_i + current_shift;
+				polygons.push_back(Models3D::Polygon3D({ i, i + 1, local_i }));
+				if (local_i + 2 != vert_shift) {
+					polygons.push_back(Models3D::Polygon3D({ i + 1, local_i, local_i + 1 }));
+				}
+			}
+			return polygons;
+		}
+
+	protected:
+		size_t GetStepsNumberInVertical() const { // because PI / STEP could fail
+			size_t steps_num = 0;
+			for (double teta = 0; teta < PI; teta += STEP) {
+				++steps_num;
+			}
+			return steps_num + 1;
+		}
+
+	protected:
+		double radius_;
+		const double STEP = 0.15;
+		const double PI = std::acos(-1);
+	};
+
 	class FromFileConstructor : public FigureConstructor {
 	public:
 		FromFileConstructor(const std::string& file_name) {

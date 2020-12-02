@@ -268,9 +268,9 @@ namespace Graphics3D {
 			// 
 			this->figureComboBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->figureComboBox->FormattingEnabled = true;
-			this->figureComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(8) {
+			this->figureComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(9) {
 				L"Hexahedron", L"Tetrahedron", L"Octahedron",
-					L"Icosahedron", L"Dodecahedron", L"Sphere", L"Torus", L"From file"
+					L"Icosahedron", L"Dodecahedron", L"Sphere", L"Torus", L"Garlic", L"From file"
 			});
 			this->figureComboBox->Location = System::Drawing::Point(84, 18);
 			this->figureComboBox->Name = L"figureComboBox";
@@ -618,6 +618,9 @@ namespace Graphics3D {
 			}
 			else if (mode == "Torus") {
 				return fabric.CreateTorus(2, 1); // TODO
+			}
+			else if (mode == "Garlic") {
+				return fabric.CreateGarlic(figure_size);
 			}
 			else if (mode == "From file") {
 				std::optional<std::string> file_name = GetFileNameFromDialog();
