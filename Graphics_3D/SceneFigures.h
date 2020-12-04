@@ -57,7 +57,7 @@ namespace Figures3D {
 				for (const Polygon3D& polygon : polygons) {
 					std::vector<const Point3D*> polygon_coords = polygon.GetCoords(scene_coords);
 					PlaneEquation plane = polygon.GetPlaneEquation(scene_coords);
-					AddPolygonOnScene(bm, buffer, polygon_coords, plane);
+					AddPolygonOnScene(bm, buffer, polygon_coords, plane, figure.GetFigureColor());
 				}
 			}
 		}
@@ -65,7 +65,7 @@ namespace Figures3D {
 	protected:
 		typedef std::vector<std::vector<std::optional<double>>> Buffer;
 
-		void AddPolygonOnScene(Bitmap^ bm, Buffer& buffer, const std::vector<const Point3D*>& polygon_coords, const Models3D::PlaneEquation& plane) const {
+		void AddPolygonOnScene(Bitmap^ bm, Buffer& buffer, const std::vector<const Point3D*>& polygon_coords, const Models3D::PlaneEquation& plane, const Color& figure_color) const {
 			using namespace Models3D;
 
 			int min_y = (int)polygon_coords[0]->y;
@@ -111,7 +111,7 @@ namespace Figures3D {
 							double z = (plane.d - plane.a * x - plane.b * y) / plane.c;
 							if (!buffer[x][y].has_value() || *buffer[x][y] < z) {
 								buffer[x][y] = z;
-								bm->SetPixel(x, y, Color::Green); // TODO
+								bm->SetPixel(x, y, figure_color);
 							}
 						}
 					}

@@ -41,6 +41,7 @@ namespace Graphics3D {
 			projectionComboBox->SelectedIndex = 0;
 			figuresVisibilityComboBox->SelectedIndex = 0;
 
+			colorButton->BackColor = ApplicationSettings::GetDefaultColor();
 			focusDistanceTextBox->Text = ApplicationSettings::GetFocusDistance().ToString();
 			figureSizeTextBox->Text = ApplicationSettings::GetFiguresDefaultSize().ToString();
 
@@ -99,6 +100,8 @@ namespace Graphics3D {
 
 	private: System::Windows::Forms::Button^  clearButton;
 	private: System::Windows::Forms::Button^  saveFigureButton;
+	private: System::Windows::Forms::GroupBox^  colorGroupBox;
+	private: System::Windows::Forms::Button^  colorButton;
 
 
 	private:
@@ -145,6 +148,8 @@ namespace Graphics3D {
 			this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->figuresGroupBox = (gcnew System::Windows::Forms::GroupBox());
 			this->addFigureButton = (gcnew System::Windows::Forms::Button());
+			this->colorGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->colorButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox))->BeginInit();
 			this->rotateGroupBox->SuspendLayout();
 			this->utilsGroupBox->SuspendLayout();
@@ -153,13 +158,14 @@ namespace Graphics3D {
 			this->projectionGroupBox->SuspendLayout();
 			this->mainMenu->SuspendLayout();
 			this->figuresGroupBox->SuspendLayout();
+			this->colorGroupBox->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// pictureBox
 			// 
 			this->pictureBox->Location = System::Drawing::Point(12, 83);
 			this->pictureBox->Name = L"pictureBox";
-			this->pictureBox->Size = System::Drawing::Size(1462, 587);
+			this->pictureBox->Size = System::Drawing::Size(1514, 587);
 			this->pictureBox->TabIndex = 0;
 			this->pictureBox->TabStop = false;
 			// 
@@ -210,7 +216,7 @@ namespace Graphics3D {
 			this->utilsGroupBox->Controls->Add(this->saveFigureButton);
 			this->utilsGroupBox->Controls->Add(this->clearButton);
 			this->utilsGroupBox->Controls->Add(this->resetButton);
-			this->utilsGroupBox->Location = System::Drawing::Point(1217, 27);
+			this->utilsGroupBox->Location = System::Drawing::Point(1269, 27);
 			this->utilsGroupBox->Name = L"utilsGroupBox";
 			this->utilsGroupBox->Size = System::Drawing::Size(257, 50);
 			this->utilsGroupBox->TabIndex = 3;
@@ -378,7 +384,7 @@ namespace Graphics3D {
 			this->projectionGroupBox->Controls->Add(this->ZcLabel);
 			this->projectionGroupBox->Controls->Add(this->focusDistanceTextBox);
 			this->projectionGroupBox->Controls->Add(this->projectionComboBox);
-			this->projectionGroupBox->Location = System::Drawing::Point(666, 27);
+			this->projectionGroupBox->Location = System::Drawing::Point(718, 27);
 			this->projectionGroupBox->Name = L"projectionGroupBox";
 			this->projectionGroupBox->Size = System::Drawing::Size(272, 50);
 			this->projectionGroupBox->TabIndex = 6;
@@ -422,7 +428,7 @@ namespace Graphics3D {
 			this->mainMenu->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::HorizontalStackWithOverflow;
 			this->mainMenu->Location = System::Drawing::Point(0, 0);
 			this->mainMenu->Name = L"mainMenu";
-			this->mainMenu->Size = System::Drawing::Size(1488, 24);
+			this->mainMenu->Size = System::Drawing::Size(1539, 24);
 			this->mainMenu->TabIndex = 7;
 			this->mainMenu->Text = L"mainMenu";
 			// 
@@ -452,7 +458,7 @@ namespace Graphics3D {
 			this->figuresGroupBox->Controls->Add(this->figureComboBox);
 			this->figuresGroupBox->Controls->Add(this->figureSizeTextBox);
 			this->figuresGroupBox->Controls->Add(this->sizeLabel);
-			this->figuresGroupBox->Location = System::Drawing::Point(944, 27);
+			this->figuresGroupBox->Location = System::Drawing::Point(996, 27);
 			this->figuresGroupBox->Name = L"figuresGroupBox";
 			this->figuresGroupBox->Size = System::Drawing::Size(267, 50);
 			this->figuresGroupBox->TabIndex = 8;
@@ -469,11 +475,31 @@ namespace Graphics3D {
 			this->addFigureButton->UseVisualStyleBackColor = true;
 			this->addFigureButton->Click += gcnew System::EventHandler(this, &MyForm::addFigureButton_Click);
 			// 
+			// colorGroupBox
+			// 
+			this->colorGroupBox->Controls->Add(this->colorButton);
+			this->colorGroupBox->Location = System::Drawing::Point(666, 27);
+			this->colorGroupBox->Name = L"colorGroupBox";
+			this->colorGroupBox->Size = System::Drawing::Size(46, 50);
+			this->colorGroupBox->TabIndex = 9;
+			this->colorGroupBox->TabStop = false;
+			this->colorGroupBox->Text = L"Color";
+			// 
+			// colorButton
+			// 
+			this->colorButton->Location = System::Drawing::Point(6, 18);
+			this->colorButton->Name = L"colorButton";
+			this->colorButton->Size = System::Drawing::Size(34, 23);
+			this->colorButton->TabIndex = 0;
+			this->colorButton->UseVisualStyleBackColor = true;
+			this->colorButton->Click += gcnew System::EventHandler(this, &MyForm::colorButton_Click);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1488, 682);
+			this->ClientSize = System::Drawing::Size(1539, 682);
+			this->Controls->Add(this->colorGroupBox);
 			this->Controls->Add(this->figuresGroupBox);
 			this->Controls->Add(this->projectionGroupBox);
 			this->Controls->Add(this->scaleGroupBox);
@@ -496,6 +522,7 @@ namespace Graphics3D {
 			this->mainMenu->PerformLayout();
 			this->figuresGroupBox->ResumeLayout(false);
 			this->figuresGroupBox->PerformLayout();
+			this->colorGroupBox->ResumeLayout(false);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -575,6 +602,16 @@ namespace Graphics3D {
 			}
 		}
 
+		private: System::Void colorButton_Click(System::Object^  sender, System::EventArgs^  e) {
+			ColorDialog^ color_dialog = gcnew ColorDialog();
+
+			if (color_dialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+				colorButton->BackColor = color_dialog->Color;
+				GetCurrentFigure().SetFigureColor(color_dialog->Color);
+				UpdateFiguresView();
+			}
+		}
+
 	protected:
 		void ClearImage() {
 			Graphics^ g = Graphics::FromImage(bm);
@@ -593,6 +630,7 @@ namespace Graphics3D {
 		std::optional<Figure> CreateFigure(double figure_size) {
 			String^ mode = (String^)figureComboBox->SelectedItem;
 			Figures3D::FuguresFabric fabric(
+				colorButton->BackColor,
 				ApplicationSettings::GetCanvasScale(),
 				pictureBox->Width / 2, pictureBox->Height / 2,
 				current_focus_distance,
@@ -617,7 +655,7 @@ namespace Graphics3D {
 				return fabric.CreateSphere(figure_size);
 			}
 			else if (mode == "Torus") {
-				return fabric.CreateTorus(2, 1); // TODO
+				return fabric.CreateTorus(figure_size, figure_size / 2);
 			}
 			else if (mode == "Garlic") {
 				return fabric.CreateGarlic(figure_size);
@@ -659,27 +697,6 @@ namespace Graphics3D {
 					scene_figures->TakePerspectiveProjectionZAlgo(bm);
 				} else {
 					scene_figures->TakeOrthogonalProjectionZAlgo(bm);
-				}
-			}
-			pictureBox->Refresh();
-		}
-
-		void UpdateFigureView(const Figures3D::Figure& figure) {
-			String^ projection_mode = (String^)projectionComboBox->SelectedItem;
-			String^ visibility_mode = (String^)figuresVisibilityComboBox->SelectedItem;
-			bool is_perspective_mode = projection_mode == "Perspective";
-			bool is_only_visible_mode = visibility_mode == "Only visible";
-			if (is_perspective_mode) {
-				if (is_only_visible_mode) {
-					figure.TakeOnlyVisiblePerspectiveProjection(bm);
-				} else {
-					figure.TakePerspectiveProjection(bm);
-				}
-			} else {
-				if (is_only_visible_mode) {
-					figure.TakeOnlyVisibleOrthogonalProjection(bm);
-				} else {
-					figure.TakeOrthogonalProjection(bm);
 				}
 			}
 			pictureBox->Refresh();
@@ -745,6 +762,8 @@ namespace Graphics3D {
 			focusDistanceTextBox->Enabled = enabled;
 			projectionComboBox->Enabled = enabled;
 			figuresVisibilityComboBox->Enabled = enabled;
+
+			colorButton->Enabled = enabled;
 
 			resetButton->Enabled = enabled;
 			saveFigureButton->Enabled = enabled;

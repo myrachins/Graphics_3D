@@ -19,10 +19,10 @@ namespace Figures3D {
 
 	class Figure {
 	public:
-		Figure(const FiguresConstructors::FigureConstructor& constructor,
+		Figure(const FiguresConstructors::FigureConstructor& constructor, Color color,
 			double canvas_scale, double x_canvas_shift, double y_canvas_shift,
 			double focus_distance, double camera_distance)
-			: x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
+			: figure_color_(color.ToArgb()), x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
 			, canvas_scale_(canvas_scale), focus_distance_(focus_distance), camera_distance_(camera_distance) {
 			coords_ = constructor.ConstructCoords();
 			polygons_ = constructor.ConstructPolygons();
@@ -63,6 +63,13 @@ namespace Figures3D {
 
 		void SetFocusDistance(double focus_distance) {
 			focus_distance_ = focus_distance;
+		}
+
+		void SetFigureColor(Color color) {
+			figure_color_ = color.ToArgb();
+		}
+		Color GetFigureColor() const {
+			return Color::FromArgb(figure_color_);
 		}
 
 		std::vector<Point3D> GetSceneCoords(bool perspective) const {
@@ -108,10 +115,10 @@ namespace Figures3D {
 				const Models3D::CanvasCoordinate* prev_coordinate = nullptr;
 				const std::vector<CanvasCoordinate>& coords = polygon.GetCoords();
 				for (size_t i = 0; i + 1 < coords.size(); ++i) {
-					CanvasUtils::DrawLine(bm, coords[i], coords[i + 1], Color::Black);
+					CanvasUtils::DrawLine(bm, coords[i], coords[i + 1], GetFigureColor());
 				}
 				if (!coords.empty()) {
-					CanvasUtils::DrawLine(bm, coords.back(), coords[0], Color::Black);
+					CanvasUtils::DrawLine(bm, coords.back(), coords[0], GetFigureColor());
 				}
 			}
 		}
@@ -184,14 +191,15 @@ namespace Figures3D {
 	protected:
 		std::vector<Point3D> coords_;
 		std::vector<Polygon3D> polygons_;
+		int figure_color_;
 		double x_canvas_shift_, y_canvas_shift_, canvas_scale_;
 		double focus_distance_, camera_distance_;
 	};
 
 	class FuguresFabric {
 	public:
-		FuguresFabric(double canvas_scale, double x_canvas_shift, double y_canvas_shift, double focus_distance, double camera_distance)
-			: x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
+		FuguresFabric(Color color, double canvas_scale, double x_canvas_shift, double y_canvas_shift, double focus_distance, double camera_distance)
+			: figure_color_(color.ToArgb()), x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
 			, canvas_scale_(canvas_scale), focus_distance_(focus_distance), camera_distance_(camera_distance) { }
 
 		Figure CreateHexahedron(double edge_len) {
@@ -232,10 +240,11 @@ namespace Figures3D {
 
 	protected:
 		Figure CreateFigure(const FiguresConstructors::FigureConstructor& constructor) const {
-			return Figure(constructor, canvas_scale_, x_canvas_shift_, y_canvas_shift_, focus_distance_, camera_distance_);
+			return Figure(constructor, Color::FromArgb(figure_color_), canvas_scale_, x_canvas_shift_, y_canvas_shift_, focus_distance_, camera_distance_);
 		}
 
 	protected:
+		int figure_color_;
 		double x_canvas_shift_, y_canvas_shift_, canvas_scale_;
 		double focus_distance_, camera_distance_;
 	};

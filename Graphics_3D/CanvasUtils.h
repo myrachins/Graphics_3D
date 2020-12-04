@@ -42,6 +42,9 @@ namespace CanvasUtils {
 		static double GetFiguresDefaultSize() {
 			return 2;
 		}
+		static Color GetDefaultColor() {
+			return Color::Black;
+		}
 	};
 
 	template <typename T>
