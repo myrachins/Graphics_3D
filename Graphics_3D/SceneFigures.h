@@ -108,7 +108,7 @@ namespace Figures3D {
 				for (int i = 0; i + 1 < x_crossings.size(); i += 2) {
 					for (int x = x_crossings[i]; x <= x_crossings[i + 1]; ++x) {
 						if (x >= 0 && x < scene_width_ && y >= 0 && y < scene_height_ && plane.c != 0) {
-							double z = (plane.d - plane.a * x - plane.b * y) / plane.c;
+							double z = (-plane.d - plane.a * x - plane.b * y) / plane.c;
 							if (!buffer[x][y].has_value() || *buffer[x][y] < z) {
 								buffer[x][y] = z;
 								bm->SetPixel(x, y, figure_color);
