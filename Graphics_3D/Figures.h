@@ -28,9 +28,6 @@ namespace Figures3D {
 			polygons_ = constructor.ConstructPolygons();
 		}
 
-		Figure(const Figure&) = delete;
-		Figure& operator=(const Figure&) = delete;
-
 		void RotateX(double angle) {
 			UpdateCoordinates(Operations3D::RotateX(angle));
 		}
@@ -45,7 +42,7 @@ namespace Figures3D {
 			TakeProjection(bm, coords_, polygons_);
 		}
 		void TakeOnlyVisibleOrthogonalProjection(Bitmap^ bm) const {
-			TakeProjection(bm, coords_, GetOnlyVisiblePlygons(coords_));
+			TakeProjection(bm, coords_, GetOnlyVisiblePolygons(coords_));
 		}
 		void TakePerspectiveProjection(Bitmap^ bm) const {
 			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
@@ -53,7 +50,7 @@ namespace Figures3D {
 		}
 		void TakeOnlyVisiblePerspectiveProjection(Bitmap^ bm) const {
 			std::vector<Point3D> transformed_coords = Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_));
-			TakeProjection(bm, transformed_coords, GetOnlyVisiblePlygons(transformed_coords));
+			TakeProjection(bm, transformed_coords, GetOnlyVisiblePolygons(transformed_coords));
 		}
 
 		void Shift(double dx, double dy, double dz) {
@@ -66,6 +63,23 @@ namespace Figures3D {
 
 		void SetFocusDistance(double focus_distance) {
 			focus_distance_ = focus_distance;
+		}
+
+		std::vector<Point3D> GetSceneCoords(bool perspective) const {
+			std::vector<Point3D> coords = perspective
+				? Operations3D::ApplyForAll(coords_, Operations3D::PerspectiveZProjection(focus_distance_))
+				: coords_;
+
+			for (Point3D& coord : coords) {
+				CanvasCoordinate canvas_coord = GetCanvasCoordinate(coord);
+				coord.x = canvas_coord.x;
+				coord.y = canvas_coord.y;
+			}
+			return coords;
+		}
+
+		const std::vector<Polygon3D>& GetPolygons() const {
+			return polygons_;
 		}
 
 		void SaveToFile(const std::string& file_name) const {
@@ -139,7 +153,7 @@ namespace Figures3D {
 			return (plane.a * view_point.x + plane.b * view_point.y + plane.c * view_point.z + plane.d) > 0;
 		}
 
-		std::vector<Polygon3D> GetOnlyVisiblePlygons(const std::vector<Point3D>& coords) const {
+		std::vector<Polygon3D> GetOnlyVisiblePolygons(const std::vector<Point3D>& coords) const {
 			std::vector<Polygon3D> only_visible;
 			std::copy_if(polygons_.begin(), polygons_.end(), std::back_inserter(only_visible),
 				[&](const Polygon3D& polygon) {
@@ -180,45 +194,45 @@ namespace Figures3D {
 			: x_canvas_shift_(x_canvas_shift), y_canvas_shift_(y_canvas_shift)
 			, canvas_scale_(canvas_scale), focus_distance_(focus_distance), camera_distance_(camera_distance) { }
 
-		std::unique_ptr<Figure> CreateHexahedron(double edge_len) {
+		Figure CreateHexahedron(double edge_len) {
 			return CreateFigure(FiguresConstructors::HexahedronConstructor(edge_len));
 		}
 
-		std::unique_ptr<Figure> CreateTetrahedron(double edge_len) {
+		Figure CreateTetrahedron(double edge_len) {
 			return CreateFigure(FiguresConstructors::TetrahedronConstructor(edge_len));
 		}
 
-		std::unique_ptr<Figure> CreateOctahedron(double edge_len) {
+		Figure CreateOctahedron(double edge_len) {
 			return CreateFigure(FiguresConstructors::OctahedronConstructor(edge_len));
 		}
 
-		std::unique_ptr<Figure> CreateIcosahedron(double edge_len) {
+		Figure CreateIcosahedron(double edge_len) {
 			return CreateFigure(FiguresConstructors::IcosahedronConstructor(edge_len));
 		}
 
-		std::unique_ptr<Figure> CreateSphere(double radius) {
+		Figure CreateSphere(double radius) {
 			return CreateFigure(FiguresConstructors::SphereConstructor(radius));
 		}
 
-		std::unique_ptr<Figure> CreateDodecahedron(double edge_len) {
+		Figure CreateDodecahedron(double edge_len) {
 			return CreateFigure(FiguresConstructors::DodecahedronConstructor(edge_len));
 		}
 
-		std::unique_ptr<Figure> CreateTorus(double big_r, double small_r) {
+		Figure CreateTorus(double big_r, double small_r) {
 			return CreateFigure(FiguresConstructors::TorusConstructor(big_r, small_r));
 		}
 
-		std::unique_ptr<Figure> CreateGarlic(double radius) {
+		Figure CreateGarlic(double radius) {
 			return CreateFigure(FiguresConstructors::GarlicConstructor(radius));
 		}
 
-		std::unique_ptr<Figure> CreateFromFile(const std::string& file_name) {
+		Figure CreateFromFile(const std::string& file_name) {
 			return CreateFigure(FiguresConstructors::FromFileConstructor(file_name));
 		}
 
 	protected:
-		std::unique_ptr<Figure> CreateFigure(const FiguresConstructors::FigureConstructor& constructor) const {
-			return std::make_unique<Figure>(constructor, canvas_scale_, x_canvas_shift_, y_canvas_shift_, focus_distance_, camera_distance_);
+		Figure CreateFigure(const FiguresConstructors::FigureConstructor& constructor) const {
+			return Figure(constructor, canvas_scale_, x_canvas_shift_, y_canvas_shift_, focus_distance_, camera_distance_);
 		}
 
 	protected:

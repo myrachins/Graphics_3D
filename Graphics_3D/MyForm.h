@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Figures.h"
 #include "CanvasUtils.h"
+#include "SceneFigures.h"
 
 #include <msclr\marshal_cppstd.h>
 #include <optional>
@@ -17,6 +17,7 @@ namespace Graphics3D {
 	using namespace System::Collections::Generic;
 
 	using Figures3D::Figure;
+	using Figures3D::SceneFigures;
 
 	using CanvasUtils::AutoPtr;
 	using CanvasUtils::ApplicationSettings;
@@ -30,7 +31,7 @@ namespace Graphics3D {
 		MyForm(void) {
 			InitializeComponent();
 			bm = gcnew Bitmap(pictureBox->Width, pictureBox->Height);
-			all_figures.Reset(std::make_unique<Figures>());
+			scene_figures.Reset(std::make_unique<SceneFigures>(pictureBox->Width, pictureBox->Height));
 			pictureBox->Image = bm;
 
 			figureComboBox->SelectedIndex = 0;
@@ -55,7 +56,7 @@ namespace Graphics3D {
 			if (components) {
 				delete components;
 			}
-			all_figures.Reset();
+			scene_figures.Reset();
 		}
 	private: System::Windows::Forms::PictureBox^  pictureBox;
 
@@ -66,8 +67,7 @@ namespace Graphics3D {
 
 	protected:
 		Bitmap^ bm;
-		typedef std::vector<std::unique_ptr<Figure>> Figures;
-		AutoPtr<Figures> all_figures;
+		AutoPtr<SceneFigures> scene_figures;
 		double current_focus_distance;
 
 	private: System::Windows::Forms::GroupBox^  utilsGroupBox;
@@ -389,7 +389,7 @@ namespace Graphics3D {
 			// 
 			this->figuresVisibilityComboBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->figuresVisibilityComboBox->FormattingEnabled = true;
-			this->figuresVisibilityComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(2) { L"Only visible", L"Whole figure" });
+			this->figuresVisibilityComboBox->Items->AddRange(gcnew cli::array< System::Object^  >(3) { L"Roberts", L"Z algo", L"Whole figures" });
 			this->figuresVisibilityComboBox->Location = System::Drawing::Point(171, 18);
 			this->figuresVisibilityComboBox->Name = L"figuresVisibilityComboBox";
 			this->figuresVisibilityComboBox->Size = System::Drawing::Size(95, 21);
@@ -529,8 +529,8 @@ namespace Graphics3D {
 				&& new_focus_distance > 0 && new_focus_distance != 1) {
 				focusDistanceTextBox->BackColor = Color::White;
 				current_focus_distance = new_focus_distance;
-				for (const auto& figure : *all_figures) {
-					figure->SetFocusDistance(current_focus_distance);
+				for (Figure& figure : scene_figures->GetFigures()) {
+					figure.SetFocusDistance(current_focus_distance);
 				}
 				UpdateFiguresView();
 			} else {
@@ -553,23 +553,23 @@ namespace Graphics3D {
 
 		private: System::Void clearButton_Click(System::Object^  sender, System::EventArgs^  e) {
 			SetEnabledForActions(false);
-			all_figures->clear();
+			scene_figures->GetFigures().clear();
 			ClearImage();
 		}
 		private: System::Void resetButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			if (!all_figures->empty()) {
-				std::unique_ptr<Figure> new_figure = CreateFigure(ApplicationSettings::GetFiguresDefaultSize());
+			if (!scene_figures->GetFigures().empty()) {
+				std::optional<Figure> new_figure = CreateFigure(ApplicationSettings::GetFiguresDefaultSize());
 				if (new_figure) {
-					all_figures->pop_back();
-					all_figures->push_back(std::move(new_figure));
+					scene_figures->GetFigures().pop_back();
+					scene_figures->GetFigures().push_back(*new_figure);
 					UpdateFiguresView();
 				}
 			}
 		}
 		private: System::Void addFigureButton_Click(System::Object^  sender, System::EventArgs^  e) {
-			std::unique_ptr<Figure> new_figure = CreateFigure(Double::Parse(figureSizeTextBox->Text));
+			std::optional<Figure> new_figure = CreateFigure(Double::Parse(figureSizeTextBox->Text));
 			if (new_figure) {
-				all_figures->push_back(std::move(new_figure));
+				scene_figures->GetFigures().push_back(*new_figure);
 				UpdateFiguresView();
 				SetEnabledForActions(true);
 			}
@@ -587,10 +587,10 @@ namespace Graphics3D {
 		}
 
 		Figure& GetCurrentFigure() {
-			return *(all_figures->back());
+			return scene_figures->GetFigures().back();
 		}
 
-		std::unique_ptr<Figure> CreateFigure(double figure_size) {
+		std::optional<Figure> CreateFigure(double figure_size) {
 			String^ mode = (String^)figureComboBox->SelectedItem;
 			Figures3D::FuguresFabric fabric(
 				ApplicationSettings::GetCanvasScale(),
@@ -625,23 +625,43 @@ namespace Graphics3D {
 			else if (mode == "From file") {
 				std::optional<std::string> file_name = GetFileNameFromDialog();
 				if (!file_name.has_value()) {
-					return nullptr;
+					return std::nullopt;
 				}
 				try {
 					return fabric.CreateFromFile(*file_name);
 				} catch (const std::runtime_error&) {
 					MessageBox::Show("Can't open file", "Error");
-					return nullptr;
+					return std::nullopt;
 				}
 			}
-			return nullptr;
+			return std::nullopt;
 		}
 
 		void UpdateFiguresView() {
 			ClearImage();
-			for (const auto& figure : *all_figures) {
-				UpdateFigureView(*figure);
+			String^ projection_mode = (String^)projectionComboBox->SelectedItem;
+			String^ visibility_mode = (String^)figuresVisibilityComboBox->SelectedItem;
+			bool is_perspective_mode = projection_mode == "Perspective";
+			if (visibility_mode == "Whole figures") {
+				if (is_perspective_mode) {
+					scene_figures->TakePerspectiveProjection(bm);
+				} else {
+					scene_figures->TakeOrthogonalProjection(bm);
+				}
+			} else if (visibility_mode == "Roberts") {
+				if (is_perspective_mode) {
+					scene_figures->TakePerspectiveProjectionRobertsAlgo(bm);
+				} else {
+					scene_figures->TakeOrthogonalProjectionRobertsAlgo(bm);
+				}
+			} else if (visibility_mode == "Z algo") {
+				if (is_perspective_mode) {
+					scene_figures->TakePerspectiveProjectionZAlgo(bm);
+				} else {
+					scene_figures->TakeOrthogonalProjectionZAlgo(bm);
+				}
 			}
+			pictureBox->Refresh();
 		}
 
 		void UpdateFigureView(const Figures3D::Figure& figure) {

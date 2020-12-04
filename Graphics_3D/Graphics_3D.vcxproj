@@ -146,6 +146,7 @@
     <ClInclude Include="FiguresConstructors.h" />
     <ClInclude Include="Operations.h" />
     <ClInclude Include="CanvasUtils.h" />
+    <ClInclude Include="SceneFigures.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MyForm.resx">
