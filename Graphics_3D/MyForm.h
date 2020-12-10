@@ -510,7 +510,7 @@ namespace Graphics3D {
 			this->Controls->Add(this->mainMenu);
 			this->MainMenuStrip = this->mainMenu;
 			this->Name = L"MyForm";
-			this->Text = L"Rachinskiy, Task #6";
+			this->Text = L"Rachinskiy, Task #7";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox))->EndInit();
 			this->rotateGroupBox->ResumeLayout(false);
 			this->utilsGroupBox->ResumeLayout(false);
@@ -797,8 +797,10 @@ namespace Graphics3D {
 
 		private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 			String^ info = "Info";
-			String^ message = "This is homework #6. Date: 26/11/2020.\n"
-				"Задание: Платоновы тела\n"
+			String^ message = "This is homework #7. Date: 10/12/2020.\n"
+				"Задание: Z буфер и свет\n"
+				"Можно менять цвет отображения текущей фигуры\n"
+				"Size: Для большинства фигур - длина ребра, для модифицированных окружностей – радиус\n"
 				"Author: Maxim Rachinskiy. OS: Windows 10\n"
 				"IDE: VS 2017, C++ 17";
 
