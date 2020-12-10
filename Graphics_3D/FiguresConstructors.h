@@ -347,6 +347,62 @@ namespace FiguresConstructors {
 		const double PI = std::acos(-1);
 	};
 
+	class SpiralConstructor : public FigureConstructor {
+	public:
+		SpiralConstructor(double small_r)
+			: small_r_(small_r) { }
+
+		std::vector<Models3D::Point3D> ConstructCoords() const override {
+			std::vector<Models3D::Point3D> coords;
+			double delta = (6 - 1) * small_r_ / (4 * PI / STEP);
+			double current_big_r = small_r_;
+
+			for (double nu = 0; nu <= 4 * PI; nu += STEP) {
+				for (double teta = 0; teta <= 2 * PI; teta += STEP) {
+					coords.push_back({
+					(current_big_r + small_r_ * std::cos(teta)) * std::cos(nu),
+					(current_big_r + small_r_ * std::cos(teta)) * std::sin(nu),
+					small_r_ * std::sin(teta) });
+				}
+				current_big_r += delta;
+			}
+			return coords;
+		}
+
+		std::vector<Models3D::Polygon3D> ConstructPolygons() const override {
+			std::vector<Models3D::Polygon3D> polygons;
+			const size_t vert_shift = GetStepsNumberInVertical();
+			const size_t number_of_shifts = ConstructCoords().size() / vert_shift;
+
+			for (size_t shift_num = 0; shift_num + 1 < number_of_shifts; ++shift_num) {
+				size_t current_shift = shift_num * vert_shift;
+				for (size_t local_i = 0; local_i + 1 < vert_shift; ++local_i) {
+					size_t i = local_i + current_shift;
+					polygons.push_back(Models3D::Polygon3D({ i, i + 1, i + vert_shift }));
+					polygons.push_back(Models3D::Polygon3D({ i + 1, i + vert_shift, i + 1 + vert_shift }));
+				}
+				if (vert_shift > 1) {
+					size_t last_i = vert_shift - 1 + current_shift;
+					polygons.push_back(Models3D::Polygon3D({ last_i, current_shift, last_i + vert_shift }));
+					polygons.push_back(Models3D::Polygon3D({ current_shift, last_i + vert_shift, current_shift + vert_shift }));
+				}
+			}
+			return polygons;
+		}
+	protected:
+		size_t GetStepsNumberInVertical() const { // because 2*PI / STEP could fail
+			size_t steps_num = 0;
+			for (double teta = 0; teta <= 2 * PI; teta += STEP) {
+				++steps_num;
+			}
+			return steps_num;
+		}
+	protected:
+		double small_r_;
+		const double STEP = 0.3;
+		const double PI = std::acos(-1);
+	};
+
 	class GarlicConstructor : public FigureConstructor {
 	public:
 		GarlicConstructor(double radius)

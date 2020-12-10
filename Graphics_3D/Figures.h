@@ -230,6 +230,10 @@ namespace Figures3D {
 			return CreateFigure(FiguresConstructors::TorusConstructor(big_r, small_r));
 		}
 
+		Figure CreateSpiral(double small_r) {
+			return CreateFigure(FiguresConstructors::SpiralConstructor(small_r));
+		}
+
 		Figure CreateGarlic(double radius) {
 			return CreateFigure(FiguresConstructors::GarlicConstructor(radius));
 		}
